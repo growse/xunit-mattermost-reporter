@@ -152,3 +152,5 @@ fabric.properties
 # Rider-specific rules
 *.sln.iml
 
+.idea/aws.xml
+lib
