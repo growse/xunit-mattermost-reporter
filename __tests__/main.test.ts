@@ -1,27 +1,19 @@
-import {wait} from '../src/wait'
-import * as process from 'process'
-import * as cp from 'child_process'
-import * as path from 'path'
+import {collectXUnitData} from "../src/xunit"
 
-test('throws invalid number', async () => {
-  const input = parseInt('foo', 10)
-  await expect(wait(input)).rejects.toThrow('milliseconds not a number')
+test('non-existent path', async () => {
+    const path = ""
+    await expect(collectXUnitData(path)).rejects.toThrow("ENOENT: no such file or directory, stat")
 })
 
-test('wait 500 ms', async () => {
-  const start = new Date()
-  await wait(500)
-  const end = new Date()
-  var delta = Math.abs(end.getTime() - start.getTime())
-  expect(delta).toBeGreaterThan(450)
+test('single test fixture', async () => {
+    const path = __dirname + "/fixtures/xunit-fixture.xml"
+    const junitResults = await collectXUnitData(path)
+    expect(junitResults.testsuites.length).toEqual(1)
+    expect(junitResults.testsuites[0].name).toEqual("org.owntracks.android.data.repos.MemoryContactsRepoTest")
 })
 
-// shows how the runner will run a javascript action with env / stdout protocol
-test('test runs', () => {
-  process.env['INPUT_MILLISECONDS'] = '500'
-  const ip = path.join(__dirname, '..', 'lib', 'main.js')
-  const options: cp.ExecSyncOptions = {
-    env: process.env
-  }
-  console.log(cp.execSync(`node ${ip}`, options).toString())
+test('multiple test fixture', async () => {
+    const path = __dirname + "/fixtures/multiple/"
+    const junitResults = await collectXUnitData(path)
+    expect(junitResults.testsuites.length).toEqual(2)
 })

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.owntracks.android.support.ParserTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2020-04-08T11:33:15" hostname="BUMP" time="24.707">
+    <properties/>
+    <testcase name="ParserShouldThrowExceptionWhenGivenEncryptedMessageWithEncryptionDisabled" classname="org.owntracks.android.support.ParserTest" time="23.456"/>
+    <testcase name="ParserCorrectlyConvertsLocationToPrettyJSON" classname="org.owntracks.android.support.ParserTest" time="0.508"/>
+    <testcase name="ParserCorrectlyConvertsLocationToPlainJSON" classname="org.owntracks.android.support.ParserTest" time="0.005"/>
+    <testcase name="ParserCorrectlyConvertsLocationToJSONWithEncryption" classname="org.owntracks.android.support.ParserTest" time="0.12"/>
+    <testcase name="ParserCorrectlyConvertsLocationToJSONWithEncryptionDisabled" classname="org.owntracks.android.support.ParserTest" time="0.005"/>
+    <testcase name="ParserReturnsMessageLocationFromValidLocationInput" classname="org.owntracks.android.support.ParserTest" time="0.356"/>
+    <testcase name="ParserReturnsMessageLocationFromValidEncryptedLocationInput" classname="org.owntracks.android.support.ParserTest" time="0.036"/>
+    <testcase name="ParserShouldDecodeStreamOfMultipleMessageLocationsCorrectly" classname="org.owntracks.android.support.ParserTest" time="0.12"/>
+    <testcase name="ParserShouldThrowExceptionOnEmptyArray" classname="org.owntracks.android.support.ParserTest" time="0.002"/>
+    <testcase name="ParserReturnsMessageUnknownOnValidOtherJSON" classname="org.owntracks.android.support.ParserTest" time="0.091"/>
+    <testcase name="ParserThrowsCorrectExceptionWhenGivenInvalidJSON" classname="org.owntracks.android.support.ParserTest" time="0.002"/>
+    <system-out><![CDATA[]]></system-out>
+    <system-err><![CDATA[]]></system-err>
+</testsuite>

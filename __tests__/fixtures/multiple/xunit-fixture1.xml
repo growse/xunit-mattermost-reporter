@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.owntracks.android.data.repos.MemoryContactsRepoTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2020-04-08T11:28:15" hostname="BUMP" time="26.817">
+    <properties/>
+    <testcase name="repoCorrectlyRegistersToEventBus" classname="org.owntracks.android.data.repos.MemoryContactsRepoTest" time="26.562"/>
+    <testcase name="repoCorrectlyUpdatesContactWithMessageLocation" classname="org.owntracks.android.data.repos.MemoryContactsRepoTest" time="0.154"/>
+    <testcase name="repoCorrectlyRemovesContactById" classname="org.owntracks.android.data.repos.MemoryContactsRepoTest" time="0.058"/>
+    <testcase name="repoCorrectlyHandlesEventModeChanged" classname="org.owntracks.android.data.repos.MemoryContactsRepoTest" time="0.026"/>
+    <testcase name="repoCorrectlyHandlesEventEndpointChanged" classname="org.owntracks.android.data.repos.MemoryContactsRepoTest" time="0.002"/>
+    <system-out><![CDATA[[FINE] No subscribers registered for event class org.owntracks.android.support.Events$FusedContactAdded
+[FINE] No subscribers registered for event class org.greenrobot.eventbus.NoSubscriberEvent
+[FINE] No subscribers registered for event class org.owntracks.android.support.Events$FusedContactAdded
+[FINE] No subscribers registered for event class org.greenrobot.eventbus.NoSubscriberEvent
+[FINE] No subscribers registered for event class org.owntracks.android.support.Events$FusedContactRemoved
+[FINE] No subscribers registered for event class org.greenrobot.eventbus.NoSubscriberEvent
+[FINE] No subscribers registered for event class org.owntracks.android.support.Events$FusedContactAdded
+[FINE] No subscribers registered for event class org.greenrobot.eventbus.NoSubscriberEvent
+[FINE] No subscribers registered for event class org.owntracks.android.support.Events$FusedContactAdded
+[FINE] No subscribers registered for event class org.greenrobot.eventbus.NoSubscriberEvent
+]]></system-out>
+    <system-err><![CDATA[]]></system-err>
+</testsuite>

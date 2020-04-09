@@ -1,10 +1,13 @@
-name: 'Your name here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+name: 'xunit-mattermost-reporter'
+description: 'A Github action to report the results of XUnit tests to Mattermost via a webhook'
+author: 'Andrew Rowson'
 inputs:
-  myInput:              # change this
-    description: 'input description here'
-    default: 'default value if applicable'
+  mattermostWebhookUrl:
+    description: 'URL of the Mattermost webhook to send the notification to'
+    required: true
+  xUnitTestPath:
+    description: 'Relative path to the directory containing the xUnit result files (or single XML file)'
+    required: true
 runs:
   using: 'node12'
   main: 'dist/index.js'

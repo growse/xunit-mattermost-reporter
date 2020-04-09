@@ -1,19 +1,28 @@
 import * as core from '@actions/core'
-import {wait} from './wait'
+import {collectXUnitData} from './xunit'
+
+
+const bent = require('bent')
 
 async function run(): Promise<void> {
-  try {
-    const ms: string = core.getInput('milliseconds')
-    core.debug(`Waiting ${ms} milliseconds ...`)
+    try {
+        const xunitPath: string = core.getInput('xUnitTestPath')
+        const mattermostWebhookUrl: string = core.getInput('mattermostWebhookUrl')
+        core.debug(`Pulling xunit results from  ${xunitPath}`)
+        const mmPost = bent('POST', 'json')
+        collectXUnitData(xunitPath)
+            .then(report => {
+                    let mmBody = {"username": "Github actions runner", "text": "test"}
+                    return mmPost(mattermostWebhookUrl, mmBody)
+                }
+            ).then(result => {
+            console.log(result)
+            core.setOutput('Mattermost response', `Success: ${result}`)
+        })
 
-    core.debug(new Date().toTimeString())
-    await wait(parseInt(ms, 10))
-    core.debug(new Date().toTimeString())
-
-    core.setOutput('time', new Date().toTimeString())
-  } catch (error) {
-    core.setFailed(error.message)
-  }
+    } catch (error) {
+        core.setFailed(error.message)
+    }
 }
 
 run()
