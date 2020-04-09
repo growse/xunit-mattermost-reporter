@@ -25,7 +25,7 @@
   "author": "Andrew Rowson",
   "license": "MIT",
   "dependencies": {
-    "@actions/core": "^1.2.0",
+    "@actions/core": "^1.2.3",
     "@actions/github": "^2.1.1",
     "bent": "^7.1.2",
     "junitxml-to-javascript": "^1.1.4"
