@@ -33,7 +33,10 @@ async function run(): Promise<void> {
         return mmPost(mattermostWebhookUrl, mmBody)
       })
       .then(result => {
-        core.setOutput('Mattermost response', `Success: ${result}`)
+        core.setOutput(
+          'Mattermost response',
+          `Success: ${JSON.stringify(result)}`
+        )
         core.endGroup()
       })
   } catch (error) {

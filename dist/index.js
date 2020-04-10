@@ -3116,7 +3116,7 @@ function run() {
                 return mmPost(mattermostWebhookUrl, mmBody);
             }))
                 .then(result => {
-                core.setOutput('Mattermost response', `Success: ${result}`);
+                core.setOutput('Mattermost response', `Success: ${JSON.stringify(result)}`);
                 core.endGroup();
             });
         }
@@ -3452,7 +3452,7 @@ function collectXUnitData(xUnitPath) {
                 return promiseChain.then((chainResults) => __awaiter(this, void 0, void 0, function* () {
                     return currentTask.then(currentResult => {
                         currentResult.testsuites
-                            .map(suite => `Adding report for ${suite}`)
+                            .map(suite => `Adding report for ${suite.name}`)
                             .forEach(msg => core.info(msg));
                         const mergedResults = {
                             testsuites: chainResults.testsuites.concat(currentResult.testsuites)

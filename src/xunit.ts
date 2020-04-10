@@ -35,7 +35,7 @@ export async function collectXUnitData(
         return promiseChain.then(async chainResults => {
           return currentTask.then(currentResult => {
             currentResult.testsuites
-              .map(suite => `Adding report for ${suite}`)
+              .map(suite => `Adding report for ${suite.name}`)
               .forEach(msg => core.info(msg))
             const mergedResults: JunitResults = {
               testsuites: chainResults.testsuites.concat(
