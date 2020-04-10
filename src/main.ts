@@ -20,22 +20,23 @@ async function run(): Promise<void> {
     }
 
     core.debug(`Pulling xunit results from  ${xunitPath}`)
-    const mmPost = bent('POST', 'json')
+    const mmPost = bent('POST', 'string')
     collectXUnitData(xunitPath)
       .then(async report => {
         core.endGroup()
         core.startGroup('Posting to Mattermost')
         const mmBody = {
-          username: 'Github actions runner',
+          username: 'Github Actions Runner',
           text: 'test',
           props: {attachments: [renderReportToMarkdown(report)]}
         }
+        core.debug(`MM payload: ${JSON.stringify(mmBody)}`)
         return mmPost(mattermostWebhookUrl, mmBody)
       })
       .then(result => {
         core.setOutput(
           'Mattermost response',
-          `Success: ${JSON.stringify(result)}`
+          `Success: ${result.statusCode} ${result}`
         )
         core.endGroup()
       })

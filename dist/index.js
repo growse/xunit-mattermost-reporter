@@ -3103,20 +3103,21 @@ function run() {
                 return;
             }
             core.debug(`Pulling xunit results from  ${xunitPath}`);
-            const mmPost = bent_1.default('POST', 'json');
+            const mmPost = bent_1.default('POST', 'string');
             xunit_1.collectXUnitData(xunitPath)
                 .then((report) => __awaiter(this, void 0, void 0, function* () {
                 core.endGroup();
                 core.startGroup('Posting to Mattermost');
                 const mmBody = {
-                    username: 'Github actions runner',
+                    username: 'Github Actions Runner',
                     text: 'test',
                     props: { attachments: [mattermost_1.renderReportToMarkdown(report)] }
                 };
+                core.debug(`MM payload: ${JSON.stringify(mmBody)}`);
                 return mmPost(mattermostWebhookUrl, mmBody);
             }))
                 .then(result => {
-                core.setOutput('Mattermost response', `Success: ${JSON.stringify(result)}`);
+                core.setOutput('Mattermost response', `Success: ${result.statusCode} ${result}`);
                 core.endGroup();
             });
         }
