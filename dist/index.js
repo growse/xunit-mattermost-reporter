@@ -3073,34 +3073,41 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const core_1 = __importDefault(__webpack_require__(470));
+const core = __importStar(__webpack_require__(470));
 const bent_1 = __importDefault(__webpack_require__(231));
 const xunit_1 = __webpack_require__(143);
 const mattermost_1 = __webpack_require__(530);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            core_1.default.startGroup('Collecting XUnit results');
-            const xunitPath = core_1.default.getInput('xUnitTestPath');
-            const mattermostWebhookUrl = core_1.default.getInput('mattermostWebhookUrl');
+            core.startGroup('Collecting XUnit results');
+            const xunitPath = core.getInput('xUnitTestPath');
+            const mattermostWebhookUrl = core.getInput('mattermostWebhookUrl');
             if (xunitPath === '') {
-                core_1.default.setFailed('xunitPath parameter is required');
+                core.setFailed('xunitPath parameter is required');
                 return;
             }
             if (mattermostWebhookUrl === '') {
-                core_1.default.setFailed('mattermostWebhookUrl parameter is required');
+                core.setFailed('mattermostWebhookUrl parameter is required');
                 return;
             }
-            core_1.default.debug(`Pulling xunit results from  ${xunitPath}`);
+            core.debug(`Pulling xunit results from  ${xunitPath}`);
             const mmPost = bent_1.default('POST', 'json');
             xunit_1.collectXUnitData(xunitPath)
                 .then((report) => __awaiter(this, void 0, void 0, function* () {
-                core_1.default.endGroup();
-                core_1.default.startGroup('Posting to Mattermost');
+                core.endGroup();
+                core.startGroup('Posting to Mattermost');
                 const mmBody = {
                     username: 'Github actions runner',
                     text: 'test',
@@ -3109,14 +3116,14 @@ function run() {
                 return mmPost(mattermostWebhookUrl, mmBody);
             }))
                 .then(result => {
-                core_1.default.setOutput('Mattermost response', `Success: ${result}`);
-                core_1.default.endGroup();
+                core.setOutput('Mattermost response', `Success: ${result}`);
+                core.endGroup();
             });
         }
         catch (error) {
             console.log(error);
-            console.log(core_1.default);
-            core_1.default.setFailed(error.message);
+            console.log(core);
+            core.setFailed(error.message);
         }
     });
 }
@@ -3414,10 +3421,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const fs_1 = __importDefault(__webpack_require__(747));
 const path_1 = __importDefault(__webpack_require__(622));
-const core_1 = __importDefault(__webpack_require__(470));
+const core = __importStar(__webpack_require__(470));
 const junitxml_to_javascript_1 = __importDefault(__webpack_require__(39));
 function collectXUnitData(xUnitPath) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -3439,7 +3453,7 @@ function collectXUnitData(xUnitPath) {
                     return currentTask.then(currentResult => {
                         currentResult.testsuites
                             .map(suite => `Adding report for ${suite}`)
-                            .forEach(msg => core_1.default.info(msg));
+                            .forEach(msg => core.info(msg));
                         const mergedResults = {
                             testsuites: chainResults.testsuites.concat(currentResult.testsuites)
                         };
