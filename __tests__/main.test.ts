@@ -1,9 +1,12 @@
-import {collectXUnitData} from '../src/main'
+import {collectXUnitData} from '../src/xunit'
 
 jest.mock('@actions/core', () => ({
   getInput: jest.fn(),
   setFailed: jest.fn(),
-  info: jest.fn()
+  info: jest.fn(),
+  debug: jest.fn(),
+  startGroup: jest.fn(),
+  endGroup: jest.fn()
 }))
 describe('Test XUnit report merging', () => {
   test('non-existent path', async () => {
