@@ -57,11 +57,9 @@ export async function collectXUnitData(
       .reduce(async (promiseChain, currentTask) => {
         return promiseChain.then(async chainResults => {
           return currentTask.then(currentResult => {
-            if (core) {
-              currentResult.testsuites
-                .map(suite => `Adding report for ${suite}`)
-                .forEach(msg => core.info(msg))
-            }
+            currentResult.testsuites
+              .map(suite => `Adding report for ${suite}`)
+              .forEach(msg => core.info(msg))
             const mergedResults: JunitResults = {
               testsuites: chainResults.testsuites.concat(
                 currentResult.testsuites
@@ -78,7 +76,6 @@ export async function collectXUnitData(
 export function renderReportToMarkdown(
   report: JunitResults
 ): MattermostAttachment {
-  context.workflow
   return {
     author_name: 'Xunit Mattermost reporter',
     color: '#00aa00',
@@ -91,12 +88,15 @@ export function renderReportToMarkdown(
 
 async function run(): Promise<void> {
   try {
+    core.startGroup('Collecting XUnit results')
     const xunitPath: string = core.getInput('xUnitTestPath')
     const mattermostWebhookUrl: string = core.getInput('mattermostWebhookUrl')
     core.debug(`Pulling xunit results from  ${xunitPath}`)
     const mmPost = bent('POST', 'json')
     collectXUnitData(xunitPath)
       .then(async report => {
+        core.endGroup()
+        core.startGroup('Posting to Mattermost')
         const mmBody = {
           username: 'Github actions runner',
           text: 'test',
@@ -105,14 +105,11 @@ async function run(): Promise<void> {
         return mmPost(mattermostWebhookUrl, mmBody)
       })
       .then(result => {
-        if (core) {
-          core.setOutput('Mattermost response', `Success: ${result}`)
-        }
+        core.setOutput('Mattermost response', `Success: ${result}`)
+        core.endGroup()
       })
   } catch (error) {
-    if (core) {
-      core.setFailed(error.message)
-    }
+    core.setFailed(error.message)
   }
 }
 

@@ -3220,11 +3220,9 @@ function collectXUnitData(xunitPath) {
                 .reduce((promiseChain, currentTask) => __awaiter(this, void 0, void 0, function* () {
                 return promiseChain.then((chainResults) => __awaiter(this, void 0, void 0, function* () {
                     return currentTask.then(currentResult => {
-                        if (core_1.default) {
-                            currentResult.testsuites
-                                .map(suite => `Adding report for ${suite}`)
-                                .forEach(msg => core_1.default.info(msg));
-                        }
+                        currentResult.testsuites
+                            .map(suite => `Adding report for ${suite}`)
+                            .forEach(msg => core_1.default.info(msg));
                         const mergedResults = {
                             testsuites: chainResults.testsuites.concat(currentResult.testsuites)
                         };
@@ -3238,7 +3236,6 @@ function collectXUnitData(xunitPath) {
 }
 exports.collectXUnitData = collectXUnitData;
 function renderReportToMarkdown(report) {
-    github_1.context.workflow;
     return {
         author_name: 'Xunit Mattermost reporter',
         color: '#00aa00',
@@ -3252,12 +3249,15 @@ exports.renderReportToMarkdown = renderReportToMarkdown;
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
+            core_1.default.startGroup('Collecting XUnit results');
             const xunitPath = core_1.default.getInput('xUnitTestPath');
             const mattermostWebhookUrl = core_1.default.getInput('mattermostWebhookUrl');
             core_1.default.debug(`Pulling xunit results from  ${xunitPath}`);
             const mmPost = bent_1.default('POST', 'json');
             collectXUnitData(xunitPath)
                 .then((report) => __awaiter(this, void 0, void 0, function* () {
+                core_1.default.endGroup();
+                core_1.default.startGroup('Posting to Mattermost');
                 const mmBody = {
                     username: 'Github actions runner',
                     text: 'test',
@@ -3266,15 +3266,12 @@ function run() {
                 return mmPost(mattermostWebhookUrl, mmBody);
             }))
                 .then(result => {
-                if (core_1.default) {
-                    core_1.default.setOutput('Mattermost response', `Success: ${result}`);
-                }
+                core_1.default.setOutput('Mattermost response', `Success: ${result}`);
+                core_1.default.endGroup();
             });
         }
         catch (error) {
-            if (core_1.default) {
-                core_1.default.setFailed(error.message);
-            }
+            core_1.default.setFailed(error.message);
         }
     });
 }
