@@ -91,6 +91,15 @@ async function run(): Promise<void> {
     core.startGroup('Collecting XUnit results')
     const xunitPath: string = core.getInput('xUnitTestPath')
     const mattermostWebhookUrl: string = core.getInput('mattermostWebhookUrl')
+    if (xunitPath==="") {
+      core.setFailed("xunitPath parameter is required")
+      return
+    }
+    if (mattermostWebhookUrl==="") {
+      core.setFailed("mattermostWebhookUrl parameter is required")
+      return
+    }
+
     core.debug(`Pulling xunit results from  ${xunitPath}`)
     const mmPost = bent('POST', 'json')
     collectXUnitData(xunitPath)
