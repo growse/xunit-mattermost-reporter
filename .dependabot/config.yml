@@ -5,3 +5,10 @@ update_configs:
     update_schedule: "daily"
     default_assignees:
       - growse
+    automerged_updates:
+      - match:
+          dependency_type: "development"
+          update_type: "all"
+      - match:
+          dependency_type: "production"
+          update_type: "semver:patch"
