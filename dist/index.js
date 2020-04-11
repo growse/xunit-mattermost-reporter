@@ -8352,17 +8352,17 @@ function renderReportToMarkdown(report) {
         ? `#${github_1.context.payload.pull_request.number} ${github_1.context.payload.pull_request.title}`
         : github_1.context.ref;
     const testsFailed = report.testsuites
-        .map(suite => suite.failures)
+        .map(suite => { var _a; return (_a = suite.failures) !== null && _a !== void 0 ? _a : 0; })
         .reduce(sumFn, 0);
     const testsErrored = report.testsuites
-        .map(suite => suite.errors)
+        .map(suite => { var _a; return (_a = suite.errors) !== null && _a !== void 0 ? _a : 0; })
         .reduce(sumFn, 0);
     const metricFields = [
         {
             short: true,
             title: 'Tests Run',
             value: report.testsuites
-                .map(suite => suite.tests)
+                .map(suite => { var _a; return (_a = suite.tests) !== null && _a !== void 0 ? _a : 0; })
                 .reduce(sumFn)
                 .toString()
         },
@@ -8370,7 +8370,7 @@ function renderReportToMarkdown(report) {
             short: true,
             title: 'Tests Succeeded',
             value: report.testsuites
-                .map(suite => suite.succeeded)
+                .map(suite => { var _a; return (_a = suite.succeeded) !== null && _a !== void 0 ? _a : 0; })
                 .reduce(sumFn)
                 .toString()
         },
@@ -8378,7 +8378,7 @@ function renderReportToMarkdown(report) {
             short: true,
             title: 'Tests Skipped',
             value: report.testsuites
-                .map(suite => suite.skipped)
+                .map(suite => { var _a; return (_a = suite.skipped) !== null && _a !== void 0 ? _a : 0; })
                 .reduce(sumFn)
                 .toString()
         },
@@ -8400,7 +8400,7 @@ function renderReportToMarkdown(report) {
         fallback: 'Fallback text',
         fields: metricFields,
         text: `![${github_1.context.actor} avatar](${actorAvatarUrl}) [${github_1.context.actor}](${actorProfileUrl}) ran some tests ran on [${thingTitle}](${(_e = (_d = github_1.context.payload.pull_request) === null || _d === void 0 ? void 0 : _d.html_url) !== null && _e !== void 0 ? _e : 'https://example.com'}) at [${github_1.context.repo.owner}/${github_1.context.repo.repo}](${repoUrl}) as part of the [${github_1.context.workflow}](${workflowUrl}) workflow.`,
-        title: `GH Context ${JSON.stringify(github_1.context)}`
+        title: `title`
     };
 }
 exports.renderReportToMarkdown = renderReportToMarkdown;

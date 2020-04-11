@@ -56,17 +56,17 @@ export function renderReportToMarkdown(
     ? `#${context.payload.pull_request.number} ${context.payload.pull_request.title}`
     : context.ref
   const testsFailed = report.testsuites
-    .map(suite => suite.failures)
+    .map(suite => suite.failures ?? 0)
     .reduce(sumFn, 0)
   const testsErrored = report.testsuites
-    .map(suite => suite.errors)
+    .map(suite => suite.errors ?? 0)
     .reduce(sumFn, 0)
   const metricFields = [
     {
       short: true,
       title: 'Tests Run',
       value: report.testsuites
-        .map(suite => suite.tests)
+        .map(suite => suite.tests ?? 0)
         .reduce(sumFn)
         .toString()
     },
@@ -74,7 +74,7 @@ export function renderReportToMarkdown(
       short: true,
       title: 'Tests Succeeded',
       value: report.testsuites
-        .map(suite => suite.succeeded)
+        .map(suite => suite.succeeded ?? 0)
         .reduce(sumFn)
         .toString()
     },
@@ -82,7 +82,7 @@ export function renderReportToMarkdown(
       short: true,
       title: 'Tests Skipped',
       value: report.testsuites
-        .map(suite => suite.skipped)
+        .map(suite => suite.skipped ?? 0)
         .reduce(sumFn)
         .toString()
     },
@@ -112,6 +112,6 @@ export function renderReportToMarkdown(
     }](${repoUrl}) as part of the [${
       context.workflow
     }](${workflowUrl}) workflow.`,
-    title: `GH Context ${JSON.stringify(context)}`
+    title: `title`
   }
 }
