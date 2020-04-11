@@ -53,7 +53,7 @@ export function renderReportToMarkdown(
     text: `![${context.actor} avatar](${actorAvatarUrl}) [${
       context.actor
     }](${actorProfileUrl}) ran some tests ran on [${
-      context.payload.pull_request?.body ?? context.ref
+      context.payload.pull_request?.title ?? context.ref
     }](${
       context.payload.pull_request?.html_url ?? 'https://example.com'
     }) at [${context.repo.owner}/${

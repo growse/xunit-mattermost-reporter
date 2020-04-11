@@ -8350,7 +8350,7 @@ function renderReportToMarkdown(report) {
         color: '#00aa00',
         fallback: 'Fallback text',
         fields: [],
-        text: `![${github_1.context.actor} avatar](${actorAvatarUrl}) [${github_1.context.actor}](${actorProfileUrl}) ran some tests ran on [${(_e = (_d = github_1.context.payload.pull_request) === null || _d === void 0 ? void 0 : _d.body) !== null && _e !== void 0 ? _e : github_1.context.ref}](${(_g = (_f = github_1.context.payload.pull_request) === null || _f === void 0 ? void 0 : _f.html_url) !== null && _g !== void 0 ? _g : 'https://example.com'}) at [${github_1.context.repo.owner}/${github_1.context.repo.repo}](${repoUrl}) as part of the ${github_1.context.workflow} workflow.`,
+        text: `![${github_1.context.actor} avatar](${actorAvatarUrl}) [${github_1.context.actor}](${actorProfileUrl}) ran some tests ran on [${(_e = (_d = github_1.context.payload.pull_request) === null || _d === void 0 ? void 0 : _d.title) !== null && _e !== void 0 ? _e : github_1.context.ref}](${(_g = (_f = github_1.context.payload.pull_request) === null || _f === void 0 ? void 0 : _f.html_url) !== null && _g !== void 0 ? _g : 'https://example.com'}) at [${github_1.context.repo.owner}/${github_1.context.repo.repo}](${repoUrl}) as part of the ${github_1.context.workflow} workflow.`,
         title: `GH Context ${JSON.stringify(github_1.context)} Report: ${JSON.stringify(report)}`
     };
 }
