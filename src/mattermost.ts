@@ -41,26 +41,73 @@ export async function postReportToMatterMost(
 export function renderReportToMarkdown(
   report: JunitResults
 ): MattermostAttachment {
+  const sumFn = (sum: number, current: number): number => {
+    return sum + current
+  }
   const repoUrl = context.payload.repository?.html_url
   const actorProfileUrl = context.payload.sender?.html_url
   const actorAvatarUrl = context.payload.sender?.avatar_url.concat('&size=18')
-
+  const workflowUrl = new URL(
+    `${repoUrl}/actions?query=workflow%3A${encodeURIComponent(
+      context.workflow
+    )}`
+  )
+  const thingTitle = context.payload.pull_request
+    ? `#${context.payload.pull_request.number} ${context.payload.pull_request.title}`
+    : context.ref
+  const testsFailed = report.testsuites
+    .map(suite => suite.failed)
+    .reduce(sumFn, 0)
+  const metricFields = [
+    {
+      short: true,
+      title: 'Tests Run',
+      value: report.testsuites
+        .map(suite => suite.tests)
+        .reduce(sumFn)
+        .toString()
+    },
+    {
+      short: true,
+      title: 'Tests Run',
+      value: report.testsuites
+        .map(suite => suite.succeeded)
+        .reduce(sumFn)
+        .toString()
+    },
+    {
+      short: true,
+      title: 'Tests Skipped',
+      value: report.testsuites
+        .map(suite => suite.skipped)
+        .reduce(sumFn)
+        .toString()
+    },
+    {short: true, title: 'Tests Failed', value: testsFailed.toString()},
+    {
+      short: true,
+      title: 'Duration',
+      value: report.testsuites
+        .map(suite => suite.durationSec)
+        .reduce(sumFn)
+        .toString()
+    }
+  ]
+  const colour = testsFailed === 0 ? '#00aa00' : 'aa0000'
   return {
-    author_name: 'Xunit Mattermost reporter on ',
-    color: '#00aa00',
+    author_name: 'Xunit Mattermost Reporter',
+    color: colour,
     fallback: 'Fallback text',
-    fields: [],
+    fields: metricFields,
     text: `![${context.actor} avatar](${actorAvatarUrl}) [${
       context.actor
-    }](${actorProfileUrl}) ran some tests ran on [${
-      context.payload.pull_request?.title ?? context.ref
-    }](${
+    }](${actorProfileUrl}) ran some tests ran on [${thingTitle}](${
       context.payload.pull_request?.html_url ?? 'https://example.com'
     }) at [${context.repo.owner}/${
       context.repo.repo
-    }](${repoUrl}) as part of the ${context.workflow} workflow.`,
-    title: `GH Context ${JSON.stringify(context)} Report: ${JSON.stringify(
-      report
-    )}`
+    }](${repoUrl}) as part of the [${
+      context.workflow
+    }](${workflowUrl}) workflow.`,
+    title: `GH Context ${JSON.stringify(context)}`
   }
 }

@@ -3214,8 +3214,6 @@ function run() {
             });
         }
         catch (error) {
-            console.log(error);
-            console.log(core);
             core.setFailed(error.message);
         }
     });
@@ -8327,6 +8325,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const github_1 = __webpack_require__(469);
 const core = __importStar(__webpack_require__(470));
 const bent_1 = __importDefault(__webpack_require__(231));
+const url_1 = __webpack_require__(835);
 function postReportToMatterMost(mattermostWebhookUrl, report) {
     return __awaiter(this, void 0, void 0, function* () {
         const mmBody = {
@@ -8341,17 +8340,63 @@ function postReportToMatterMost(mattermostWebhookUrl, report) {
 }
 exports.postReportToMatterMost = postReportToMatterMost;
 function renderReportToMarkdown(report) {
-    var _a, _b, _c, _d, _e, _f, _g;
+    var _a, _b, _c, _d, _e;
+    const sumFn = (sum, current) => {
+        return sum + current;
+    };
     const repoUrl = (_a = github_1.context.payload.repository) === null || _a === void 0 ? void 0 : _a.html_url;
     const actorProfileUrl = (_b = github_1.context.payload.sender) === null || _b === void 0 ? void 0 : _b.html_url;
     const actorAvatarUrl = (_c = github_1.context.payload.sender) === null || _c === void 0 ? void 0 : _c.avatar_url.concat('&size=18');
+    const workflowUrl = new url_1.URL(`${repoUrl}/actions?query=workflow%3A${encodeURIComponent(github_1.context.workflow)}`);
+    const thingTitle = github_1.context.payload.pull_request
+        ? `#${github_1.context.payload.pull_request.number} ${github_1.context.payload.pull_request.title}`
+        : github_1.context.ref;
+    const testsFailed = report.testsuites
+        .map(suite => suite.failed)
+        .reduce(sumFn, 0);
+    const metricFields = [
+        {
+            short: true,
+            title: 'Tests Run',
+            value: report.testsuites
+                .map(suite => suite.tests)
+                .reduce(sumFn)
+                .toString()
+        },
+        {
+            short: true,
+            title: 'Tests Run',
+            value: report.testsuites
+                .map(suite => suite.succeeded)
+                .reduce(sumFn)
+                .toString()
+        },
+        {
+            short: true,
+            title: 'Tests Skipped',
+            value: report.testsuites
+                .map(suite => suite.skipped)
+                .reduce(sumFn)
+                .toString()
+        },
+        { short: true, title: 'Tests Failed', value: testsFailed.toString() },
+        {
+            short: true,
+            title: 'Duration',
+            value: report.testsuites
+                .map(suite => suite.durationSec)
+                .reduce(sumFn)
+                .toString()
+        }
+    ];
+    const colour = testsFailed === 0 ? '#00aa00' : 'aa0000';
     return {
-        author_name: 'Xunit Mattermost reporter on ',
-        color: '#00aa00',
+        author_name: 'Xunit Mattermost Reporter',
+        color: colour,
         fallback: 'Fallback text',
-        fields: [],
-        text: `![${github_1.context.actor} avatar](${actorAvatarUrl}) [${github_1.context.actor}](${actorProfileUrl}) ran some tests ran on [${(_e = (_d = github_1.context.payload.pull_request) === null || _d === void 0 ? void 0 : _d.title) !== null && _e !== void 0 ? _e : github_1.context.ref}](${(_g = (_f = github_1.context.payload.pull_request) === null || _f === void 0 ? void 0 : _f.html_url) !== null && _g !== void 0 ? _g : 'https://example.com'}) at [${github_1.context.repo.owner}/${github_1.context.repo.repo}](${repoUrl}) as part of the ${github_1.context.workflow} workflow.`,
-        title: `GH Context ${JSON.stringify(github_1.context)} Report: ${JSON.stringify(report)}`
+        fields: metricFields,
+        text: `![${github_1.context.actor} avatar](${actorAvatarUrl}) [${github_1.context.actor}](${actorProfileUrl}) ran some tests ran on [${thingTitle}](${(_e = (_d = github_1.context.payload.pull_request) === null || _d === void 0 ? void 0 : _d.html_url) !== null && _e !== void 0 ? _e : 'https://example.com'}) at [${github_1.context.repo.owner}/${github_1.context.repo.repo}](${repoUrl}) as part of the [${github_1.context.workflow}](${workflowUrl}) workflow.`,
+        title: `GH Context ${JSON.stringify(github_1.context)}`
     };
 }
 exports.renderReportToMarkdown = renderReportToMarkdown;

@@ -30,8 +30,6 @@ async function run(): Promise<void> {
         core.endGroup()
       })
   } catch (error) {
-    console.log(error)
-    console.log(core)
     core.setFailed(error.message)
   }
 }
