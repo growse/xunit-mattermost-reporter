@@ -41,24 +41,26 @@ export async function postReportToMatterMost(
 export function renderReportToMarkdown(
   report: JunitResults
 ): MattermostAttachment {
-  const ghBaseUrl = new URL('https://github.com')
-  const repoUrl = new URL(
-    `${encodeURIComponent(context.repo.owner)}/${encodeURIComponent(
-      context.repo.repo
-    )}`,
-    ghBaseUrl
-  )
-  const actorProfileUrl = new URL(encodeURIComponent(context.actor), ghBaseUrl)
-  const actorAvatarUrl = new URL(
-    `${encodeURIComponent(context.actor)}.png?size=18`,
-    ghBaseUrl
-  )
+  const repoUrl = context.payload.repository?.html_url
+  const actorProfileUrl = context.payload.sender?.html_url
+  const actorAvatarUrl = context.payload.sender?.avatar_url.concat('&size=18')
+
   return {
     author_name: 'Xunit Mattermost reporter on ',
     color: '#00aa00',
     fallback: 'Fallback text',
     fields: [],
-    text: `![${context.actor} avatar](${actorAvatarUrl}) [${context.actor}](${actorProfileUrl}) ran some tests ran on [${context.repo.owner}/${context.repo.repo}](${repoUrl}) as part of the ${context.workflow}workflow.`,
-    title: `GH Context ${JSON.stringify(context)} ${JSON.stringify(report)}`
+    text: `![${context.actor} avatar](${actorAvatarUrl}) [${
+      context.actor
+    }](${actorProfileUrl}) ran some tests ran on [${
+      context.payload.pull_request?.body ?? context.ref
+    }](${
+      context.payload.pull_request?.html_url ?? 'https://example.com'
+    }) at [${context.repo.owner}/${
+      context.repo.repo
+    }](${repoUrl}) as part of the ${context.workflow} workflow.`,
+    title: `GH Context ${JSON.stringify(context)} Report: ${JSON.stringify(
+      report
+    )}`
   }
 }
