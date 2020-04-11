@@ -1,9 +1,7 @@
 import * as core from '@actions/core'
 
-import bent from 'bent'
-
 import {collectXUnitData} from './xunit'
-import {renderReportToMarkdown} from './mattermost'
+import {postReportToMatterMost} from './mattermost'
 
 async function run(): Promise<void> {
   try {
@@ -20,24 +18,15 @@ async function run(): Promise<void> {
     }
 
     core.debug(`Pulling xunit results from  ${xunitPath}`)
-    const mmPost = bent('POST', 'string')
+
     collectXUnitData(xunitPath)
       .then(async report => {
         core.endGroup()
         core.startGroup('Posting to Mattermost')
-        const mmBody = {
-          username: 'Github Actions Runner',
-          text: 'test',
-          props: {attachments: [renderReportToMarkdown(report)]}
-        }
-        core.debug(`MM payload: ${JSON.stringify(mmBody)}`)
-        return mmPost(mattermostWebhookUrl, mmBody)
+        return postReportToMatterMost(mattermostWebhookUrl, report)
       })
       .then(result => {
-        core.setOutput(
-          'Mattermost response',
-          `Success: ${result.statusCode} ${result}`
-        )
+        core.setOutput('Mattermost response', `Success: ${result}`)
         core.endGroup()
       })
   } catch (error) {

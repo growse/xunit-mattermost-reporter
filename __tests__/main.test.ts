@@ -1,4 +1,5 @@
 import {collectXUnitData} from '../src/xunit'
+import {postReportToMatterMost} from '../src/mattermost'
 
 jest.mock('@actions/core', () => ({
   getInput: jest.fn(),
@@ -8,6 +9,7 @@ jest.mock('@actions/core', () => ({
   startGroup: jest.fn(),
   endGroup: jest.fn()
 }))
+
 describe('Test XUnit report merging', () => {
   test('non-existent path', async () => {
     const path = ''

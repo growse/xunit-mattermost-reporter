@@ -388,6 +388,13 @@ module.exports._enoent = enoent;
 
 /***/ }),
 
+/***/ 34:
+/***/ (function(module) {
+
+module.exports = require("https");
+
+/***/ }),
+
 /***/ 39:
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -1974,7 +1981,7 @@ module.exports = windowsRelease;
 /* globals atob, btoa, crypto */
 /* istanbul ignore file */
 
-const bytes = __webpack_require__(462)
+const bytes = __webpack_require__(101)
 
 bytes.from = (_from, _encoding) => {
   if (_from instanceof DataView) return _from
@@ -2106,6 +2113,102 @@ exports.create = (resultObj, customTag, sumTestCasesDuration) => new Report(resu
 /***/ (function(module) {
 
 module.exports = require("os");
+
+/***/ }),
+
+/***/ 101:
+/***/ (function(module) {
+
+"use strict";
+
+
+const length = (a, b) => {
+  if (a.byteLength === b.byteLength) return a.byteLength
+  else if (a.byteLength > b.byteLength) return a.byteLength
+  return b.byteLength
+}
+
+const bytes = (_from, encoding) => bytes.from(_from, encoding)
+
+bytes.sorter = (a, b) => {
+  a = bytes(a)
+  b = bytes(b)
+  const len = length(a, b)
+  let i = 0
+  while (i < (len - 1)) {
+    if (i >= a.byteLength) return 1
+    else if (i >= b.byteLength) return -1
+
+    if (a.getUint8(i) < b.getUint8(i)) return -1
+    else if (a.getUint8(i) > b.getUint8(i)) return 1
+    i++
+  }
+  return 0
+}
+
+bytes.compare = (a, b) => !bytes.sorter(a, b)
+bytes.memcopy = (_from, encoding) => {
+  const b = bytes(_from, encoding)
+  return b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength)
+}
+bytes.arrayBuffer = (_from, encoding) => {
+  _from = bytes(_from, encoding)
+  if (_from.buffer.byteLength === _from.byteLength) return _from.buffer
+  return _from.buffer.slice(_from.byteOffset, _from.byteOffset + _from.byteLength)
+}
+const sliceOptions = (_from, start = 0, end = null) => {
+  _from = bytes(_from)
+  end = (end === null ? _from.byteLength : end) - start
+  return [_from.buffer, _from.byteOffset + start, end]
+}
+bytes.slice = (_from, start, end) => new DataView(...sliceOptions(_from, start, end))
+
+bytes.memcopySlice = (_from, start, end) => {
+  const [buffer, offset, length] = sliceOptions(_from, start, end)
+  return buffer.slice(offset, length + offset)
+}
+bytes.typedArray = (_from, _Class = Uint8Array) => {
+  _from = bytes(_from)
+  return new _Class(_from.buffer, _from.byteOffset, _from.byteLength / _Class.BYTES_PER_ELEMENT)
+}
+
+bytes.concat = (_from) => {
+  _from = Array.from(_from)
+  _from = _from.map(b => bytes(b))
+  const length = _from.reduce((x, y) => x + y.byteLength, 0)
+  const ret = new Uint8Array(length)
+  let i = 0
+  for (const part of _from) {
+    const view = bytes.typedArray(part)
+    ret.set(view, i)
+    i += view.byteLength
+  }
+  return ret.buffer
+}
+
+const maxEntropy = 65536
+
+bytes.random = length => {
+  const ab = new ArrayBuffer(length)
+  if (length > maxEntropy) {
+    let i = 0
+    while (i < ab.byteLength) {
+      let len
+      if (i + maxEntropy > ab.byteLength) len = ab.byteLength - i
+      else len = maxEntropy
+      const view = new Uint8Array(ab, i, len)
+      i += maxEntropy
+      bytes._randomFill(view)
+    }
+  } else {
+    const view = new Uint8Array(ab)
+    bytes._randomFill(view)
+  }
+  return ab
+}
+
+module.exports = bytes
+
 
 /***/ }),
 
@@ -3080,12 +3183,8 @@ var __importStar = (this && this.__importStar) || function (mod) {
     result["default"] = mod;
     return result;
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 const core = __importStar(__webpack_require__(470));
-const bent_1 = __importDefault(__webpack_require__(231));
 const xunit_1 = __webpack_require__(143);
 const mattermost_1 = __webpack_require__(530);
 function run() {
@@ -3103,21 +3202,14 @@ function run() {
                 return;
             }
             core.debug(`Pulling xunit results from  ${xunitPath}`);
-            const mmPost = bent_1.default('POST', 'string');
             xunit_1.collectXUnitData(xunitPath)
                 .then((report) => __awaiter(this, void 0, void 0, function* () {
                 core.endGroup();
                 core.startGroup('Posting to Mattermost');
-                const mmBody = {
-                    username: 'Github Actions Runner',
-                    text: 'test',
-                    props: { attachments: [mattermost_1.renderReportToMarkdown(report)] }
-                };
-                core.debug(`MM payload: ${JSON.stringify(mmBody)}`);
-                return mmPost(mattermostWebhookUrl, mmBody);
+                return mattermost_1.postReportToMatterMost(mattermostWebhookUrl, report);
             }))
                 .then(result => {
-                core.setOutput('Mattermost response', `Success: ${result.statusCode} ${result}`);
+                core.setOutput('Mattermost response', `Success: ${result}`);
                 core.endGroup();
             });
         }
@@ -3142,7 +3234,7 @@ run();
 var net = __webpack_require__(631);
 var tls = __webpack_require__(16);
 var http = __webpack_require__(605);
-var https = __webpack_require__(211);
+var https = __webpack_require__(34);
 var events = __webpack_require__(614);
 var assert = __webpack_require__(357);
 var util = __webpack_require__(669);
@@ -3724,9 +3816,32 @@ function checkMode (stat, options) {
 /***/ }),
 
 /***/ 211:
-/***/ (function(module) {
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
 
-module.exports = require("https");
+"use strict";
+
+
+Object.defineProperty(exports, '__esModule', { value: true });
+
+function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
+
+var osName = _interopDefault(__webpack_require__(2));
+
+function getUserAgent() {
+  try {
+    return `Node.js/${process.version.substr(1)} (${osName()}; ${process.arch})`;
+  } catch (error) {
+    if (/wmic os get Caption/.test(error.message)) {
+      return "Windows <version undetectable>";
+    }
+
+    return "<environment undetectable>";
+  }
+}
+
+exports.getUserAgent = getUserAgent;
+//# sourceMappingURL=index.js.map
+
 
 /***/ }),
 
@@ -3773,9 +3888,9 @@ function withAuthorizationPrefix(authorization) {
 "use strict";
 
 const http = __webpack_require__(605)
-const https = __webpack_require__(211)
+const https = __webpack_require__(34)
 const { URL } = __webpack_require__(835)
-const isStream = __webpack_require__(463)
+const isStream = __webpack_require__(956)
 const caseless = __webpack_require__(972)
 const bytes = __webpack_require__(414)
 const bent = __webpack_require__(717)
@@ -5053,7 +5168,7 @@ function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'defau
 var Stream = _interopDefault(__webpack_require__(413));
 var http = _interopDefault(__webpack_require__(605));
 var Url = _interopDefault(__webpack_require__(835));
-var https = _interopDefault(__webpack_require__(211));
+var https = _interopDefault(__webpack_require__(34));
 var zlib = _interopDefault(__webpack_require__(761));
 
 // Based on https://github.com/tmpvar/jsdom/blob/aa85b2abf07766ff7bf5c1f6daafb3726f2f2db5/lib/jsdom/living/blob.js
@@ -7136,36 +7251,6 @@ module.exports = readShebang;
 
 /***/ }),
 
-/***/ 392:
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, '__esModule', { value: true });
-
-function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
-
-var osName = _interopDefault(__webpack_require__(2));
-
-function getUserAgent() {
-  try {
-    return `Node.js/${process.version.substr(1)} (${osName()}; ${process.arch})`;
-  } catch (error) {
-    if (/wmic os get Caption/.test(error.message)) {
-      return "Windows <version undetectable>";
-    }
-
-    return "<environment undetectable>";
-  }
-}
-
-exports.getUserAgent = getUserAgent;
-//# sourceMappingURL=index.js.map
-
-
-/***/ }),
-
 /***/ 402:
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -7216,7 +7301,7 @@ module.exports = require("stream");
 
 const crypto = __webpack_require__(417)
 const fallback = __webpack_require__(58).from
-const bytes = __webpack_require__(462)
+const bytes = __webpack_require__(101)
 
 bytes.from = (_from, encoding) => {
   if (_from instanceof DataView) return _from
@@ -7495,129 +7580,112 @@ module.exports = pump
 "use strict";
 
 
-const length = (a, b) => {
-  if (a.byteLength === b.byteLength) return a.byteLength
-  else if (a.byteLength > b.byteLength) return a.byteLength
-  return b.byteLength
+// See http://www.robvanderwoude.com/escapechars.php
+const metaCharsRegExp = /([()\][%!^"`<>&|;, *?])/g;
+
+function escapeCommand(arg) {
+    // Escape meta chars
+    arg = arg.replace(metaCharsRegExp, '^$1');
+
+    return arg;
 }
 
-const bytes = (_from, encoding) => bytes.from(_from, encoding)
+function escapeArgument(arg, doubleEscapeMetaChars) {
+    // Convert to string
+    arg = `${arg}`;
 
-bytes.sorter = (a, b) => {
-  a = bytes(a)
-  b = bytes(b)
-  const len = length(a, b)
-  let i = 0
-  while (i < (len - 1)) {
-    if (i >= a.byteLength) return 1
-    else if (i >= b.byteLength) return -1
+    // Algorithm below is based on https://qntm.org/cmd
 
-    if (a.getUint8(i) < b.getUint8(i)) return -1
-    else if (a.getUint8(i) > b.getUint8(i)) return 1
-    i++
-  }
-  return 0
-}
+    // Sequence of backslashes followed by a double quote:
+    // double up all the backslashes and escape the double quote
+    arg = arg.replace(/(\\*)"/g, '$1$1\\"');
 
-bytes.compare = (a, b) => !bytes.sorter(a, b)
-bytes.memcopy = (_from, encoding) => {
-  const b = bytes(_from, encoding)
-  return b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength)
-}
-bytes.arrayBuffer = (_from, encoding) => {
-  _from = bytes(_from, encoding)
-  if (_from.buffer.byteLength === _from.byteLength) return _from.buffer
-  return _from.buffer.slice(_from.byteOffset, _from.byteOffset + _from.byteLength)
-}
-const sliceOptions = (_from, start = 0, end = null) => {
-  _from = bytes(_from)
-  end = (end === null ? _from.byteLength : end) - start
-  return [_from.buffer, _from.byteOffset + start, end]
-}
-bytes.slice = (_from, start, end) => new DataView(...sliceOptions(_from, start, end))
+    // Sequence of backslashes followed by the end of the string
+    // (which will become a double quote later):
+    // double up all the backslashes
+    arg = arg.replace(/(\\*)$/, '$1$1');
 
-bytes.memcopySlice = (_from, start, end) => {
-  const [buffer, offset, length] = sliceOptions(_from, start, end)
-  return buffer.slice(offset, length + offset)
-}
-bytes.typedArray = (_from, _Class = Uint8Array) => {
-  _from = bytes(_from)
-  return new _Class(_from.buffer, _from.byteOffset, _from.byteLength / _Class.BYTES_PER_ELEMENT)
-}
+    // All other backslashes occur literally
 
-bytes.concat = (_from) => {
-  _from = Array.from(_from)
-  _from = _from.map(b => bytes(b))
-  const length = _from.reduce((x, y) => x + y.byteLength, 0)
-  const ret = new Uint8Array(length)
-  let i = 0
-  for (const part of _from) {
-    const view = bytes.typedArray(part)
-    ret.set(view, i)
-    i += view.byteLength
-  }
-  return ret.buffer
-}
+    // Quote the whole thing:
+    arg = `"${arg}"`;
 
-const maxEntropy = 65536
+    // Escape meta chars
+    arg = arg.replace(metaCharsRegExp, '^$1');
 
-bytes.random = length => {
-  const ab = new ArrayBuffer(length)
-  if (length > maxEntropy) {
-    let i = 0
-    while (i < ab.byteLength) {
-      let len
-      if (i + maxEntropy > ab.byteLength) len = ab.byteLength - i
-      else len = maxEntropy
-      const view = new Uint8Array(ab, i, len)
-      i += maxEntropy
-      bytes._randomFill(view)
+    // Double escape meta chars if necessary
+    if (doubleEscapeMetaChars) {
+        arg = arg.replace(metaCharsRegExp, '^$1');
     }
-  } else {
-    const view = new Uint8Array(ab)
-    bytes._randomFill(view)
-  }
-  return ab
+
+    return arg;
 }
 
-module.exports = bytes
+module.exports.command = escapeCommand;
+module.exports.argument = escapeArgument;
 
 
 /***/ }),
 
 /***/ 463:
-/***/ (function(module) {
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
 
 "use strict";
 
 
-const isStream = stream =>
-	stream !== null &&
-	typeof stream === 'object' &&
-	typeof stream.pipe === 'function';
+Object.defineProperty(exports, '__esModule', { value: true });
 
-isStream.writable = stream =>
-	isStream(stream) &&
-	stream.writable !== false &&
-	typeof stream._write === 'function' &&
-	typeof stream._writableState === 'object';
+function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
-isStream.readable = stream =>
-	isStream(stream) &&
-	stream.readable !== false &&
-	typeof stream._read === 'function' &&
-	typeof stream._readableState === 'object';
+var deprecation = __webpack_require__(692);
+var once = _interopDefault(__webpack_require__(969));
 
-isStream.duplex = stream =>
-	isStream.writable(stream) &&
-	isStream.readable(stream);
+const logOnce = once(deprecation => console.warn(deprecation));
+/**
+ * Error with extra properties to help with debugging
+ */
 
-isStream.transform = stream =>
-	isStream.duplex(stream) &&
-	typeof stream._transform === 'function' &&
-	typeof stream._transformState === 'object';
+class RequestError extends Error {
+  constructor(message, statusCode, options) {
+    super(message); // Maintains proper stack trace (only available on V8)
 
-module.exports = isStream;
+    /* istanbul ignore next */
+
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, this.constructor);
+    }
+
+    this.name = "HttpError";
+    this.status = statusCode;
+    Object.defineProperty(this, "code", {
+      get() {
+        logOnce(new deprecation.Deprecation("[@octokit/request-error] `error.code` is deprecated, use `error.status`."));
+        return statusCode;
+      }
+
+    });
+    this.headers = options.headers || {}; // redact request credentials without mutating original request options
+
+    const requestCopy = Object.assign({}, options.request);
+
+    if (options.request.headers.authorization) {
+      requestCopy.headers = Object.assign({}, options.request.headers, {
+        authorization: options.request.headers.authorization.replace(/ .*$/, " [REDACTED]")
+      });
+    }
+
+    requestCopy.url = requestCopy.url // client_id & client_secret can be passed as URL query parameters to increase rate limit
+    // see https://developer.github.com/v3/#increasing-the-unauthenticated-rate-limit-for-oauth-applications
+    .replace(/\bclient_secret=\w+/g, "client_secret=[REDACTED]") // OAuth tokens can be passed as URL query parameters, although it is not recommended
+    // see https://developer.github.com/v3/#oauth2-token-sent-in-a-header
+    .replace(/\baccess_token=\w+/g, "access_token=[REDACTED]");
+    this.request = requestCopy;
+  }
+
+}
+
+exports.RequestError = RequestError;
+//# sourceMappingURL=index.js.map
 
 
 /***/ }),
@@ -8236,8 +8304,42 @@ module.exports = factory();
 
 "use strict";
 
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const github_1 = __webpack_require__(469);
+const core = __importStar(__webpack_require__(470));
+const bent_1 = __importDefault(__webpack_require__(231));
+function postReportToMatterMost(mattermostWebhookUrl, report) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const mmBody = {
+            username: 'Github Actions Runner',
+            text: 'test',
+            props: { attachments: [renderReportToMarkdown(report)] }
+        };
+        core.debug(`MM payload: ${JSON.stringify(mmBody)}`);
+        const mmPost = bent_1.default('string', 'POST');
+        return mmPost(mattermostWebhookUrl, mmBody);
+    });
+}
+exports.postReportToMatterMost = postReportToMatterMost;
 function renderReportToMarkdown(report) {
     return {
         author_name: 'Xunit Mattermost reporter',
@@ -8277,7 +8379,7 @@ function hasFirstPage (link) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const url = __webpack_require__(835);
 const http = __webpack_require__(605);
-const https = __webpack_require__(211);
+const https = __webpack_require__(34);
 const pm = __webpack_require__(950);
 let tunnel;
 var HttpCodes;
@@ -8917,7 +9019,7 @@ function getPreviousPage (octokit, link, headers) {
 const path = __webpack_require__(622);
 const niceTry = __webpack_require__(948);
 const resolveCommand = __webpack_require__(489);
-const escape = __webpack_require__(981);
+const escape = __webpack_require__(462);
 const readShebang = __webpack_require__(389);
 const semver = __webpack_require__(48);
 
@@ -11487,10 +11589,10 @@ Object.defineProperty(exports, '__esModule', { value: true });
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
 var endpoint = __webpack_require__(385);
-var universalUserAgent = __webpack_require__(392);
+var universalUserAgent = __webpack_require__(211);
 var isPlainObject = _interopDefault(__webpack_require__(548));
 var nodeFetch = _interopDefault(__webpack_require__(369));
-var requestError = __webpack_require__(844);
+var requestError = __webpack_require__(463);
 
 const VERSION = "5.3.4";
 
@@ -25199,69 +25301,6 @@ exports.restEndpointMethods = restEndpointMethods;
 
 /***/ }),
 
-/***/ 844:
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, '__esModule', { value: true });
-
-function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
-
-var deprecation = __webpack_require__(692);
-var once = _interopDefault(__webpack_require__(969));
-
-const logOnce = once(deprecation => console.warn(deprecation));
-/**
- * Error with extra properties to help with debugging
- */
-
-class RequestError extends Error {
-  constructor(message, statusCode, options) {
-    super(message); // Maintains proper stack trace (only available on V8)
-
-    /* istanbul ignore next */
-
-    if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, this.constructor);
-    }
-
-    this.name = "HttpError";
-    this.status = statusCode;
-    Object.defineProperty(this, "code", {
-      get() {
-        logOnce(new deprecation.Deprecation("[@octokit/request-error] `error.code` is deprecated, use `error.status`."));
-        return statusCode;
-      }
-
-    });
-    this.headers = options.headers || {}; // redact request credentials without mutating original request options
-
-    const requestCopy = Object.assign({}, options.request);
-
-    if (options.request.headers.authorization) {
-      requestCopy.headers = Object.assign({}, options.request.headers, {
-        authorization: options.request.headers.authorization.replace(/ .*$/, " [REDACTED]")
-      });
-    }
-
-    requestCopy.url = requestCopy.url // client_id & client_secret can be passed as URL query parameters to increase rate limit
-    // see https://developer.github.com/v3/#increasing-the-unauthenticated-rate-limit-for-oauth-applications
-    .replace(/\bclient_secret=\w+/g, "client_secret=[REDACTED]") // OAuth tokens can be passed as URL query parameters, although it is not recommended
-    // see https://developer.github.com/v3/#oauth2-token-sent-in-a-header
-    .replace(/\baccess_token=\w+/g, "access_token=[REDACTED]");
-    this.request = requestCopy;
-  }
-
-}
-
-exports.RequestError = RequestError;
-//# sourceMappingURL=index.js.map
-
-
-/***/ }),
-
 /***/ 850:
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -28022,6 +28061,43 @@ module.exports.shellSync = (cmd, opts) => handleShell(module.exports.sync, cmd, 
 
 /***/ }),
 
+/***/ 956:
+/***/ (function(module) {
+
+"use strict";
+
+
+const isStream = stream =>
+	stream !== null &&
+	typeof stream === 'object' &&
+	typeof stream.pipe === 'function';
+
+isStream.writable = stream =>
+	isStream(stream) &&
+	stream.writable !== false &&
+	typeof stream._write === 'function' &&
+	typeof stream._writableState === 'object';
+
+isStream.readable = stream =>
+	isStream(stream) &&
+	stream.readable !== false &&
+	typeof stream._read === 'function' &&
+	typeof stream._readableState === 'object';
+
+isStream.duplex = stream =>
+	isStream.writable(stream) &&
+	isStream.readable(stream);
+
+isStream.transform = stream =>
+	isStream.duplex(stream) &&
+	typeof stream._transform === 'function' &&
+	typeof stream._transformState === 'object';
+
+module.exports = isStream;
+
+
+/***/ }),
+
 /***/ 966:
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -28200,59 +28276,6 @@ module.exports.httpify = function (resp, headers) {
   resp.headers = c.dict
   return c
 }
-
-
-/***/ }),
-
-/***/ 981:
-/***/ (function(module) {
-
-"use strict";
-
-
-// See http://www.robvanderwoude.com/escapechars.php
-const metaCharsRegExp = /([()\][%!^"`<>&|;, *?])/g;
-
-function escapeCommand(arg) {
-    // Escape meta chars
-    arg = arg.replace(metaCharsRegExp, '^$1');
-
-    return arg;
-}
-
-function escapeArgument(arg, doubleEscapeMetaChars) {
-    // Convert to string
-    arg = `${arg}`;
-
-    // Algorithm below is based on https://qntm.org/cmd
-
-    // Sequence of backslashes followed by a double quote:
-    // double up all the backslashes and escape the double quote
-    arg = arg.replace(/(\\*)"/g, '$1$1\\"');
-
-    // Sequence of backslashes followed by the end of the string
-    // (which will become a double quote later):
-    // double up all the backslashes
-    arg = arg.replace(/(\\*)$/, '$1$1');
-
-    // All other backslashes occur literally
-
-    // Quote the whole thing:
-    arg = `"${arg}"`;
-
-    // Escape meta chars
-    arg = arg.replace(metaCharsRegExp, '^$1');
-
-    // Double escape meta chars if necessary
-    if (doubleEscapeMetaChars) {
-        arg = arg.replace(metaCharsRegExp, '^$1');
-    }
-
-    return arg;
-}
-
-module.exports.command = escapeCommand;
-module.exports.argument = escapeArgument;
 
 
 /***/ })
