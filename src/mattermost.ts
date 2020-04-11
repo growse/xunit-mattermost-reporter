@@ -56,7 +56,10 @@ export function renderReportToMarkdown(
     ? `#${context.payload.pull_request.number} ${context.payload.pull_request.title}`
     : context.ref
   const testsFailed = report.testsuites
-    .map(suite => suite.failed)
+    .map(suite => suite.failures)
+    .reduce(sumFn, 0)
+  const testsErrored = report.testsuites
+    .map(suite => suite.errors)
     .reduce(sumFn, 0)
   const metricFields = [
     {
@@ -69,7 +72,7 @@ export function renderReportToMarkdown(
     },
     {
       short: true,
-      title: 'Tests Run',
+      title: 'Tests Succeeded',
       value: report.testsuites
         .map(suite => suite.succeeded)
         .reduce(sumFn)
@@ -84,6 +87,7 @@ export function renderReportToMarkdown(
         .toString()
     },
     {short: true, title: 'Tests Failed', value: testsFailed.toString()},
+    {short: true, title: 'Tests Errored', value: testsErrored.toString()},
     {
       short: true,
       title: 'Duration',
@@ -93,7 +97,7 @@ export function renderReportToMarkdown(
         .toString()
     }
   ]
-  const colour = testsFailed === 0 ? '#00aa00' : 'aa0000'
+  const colour = testsFailed + testsErrored === 0 ? '#00aa00' : 'aa0000'
   return {
     author_name: 'Xunit Mattermost Reporter',
     color: colour,

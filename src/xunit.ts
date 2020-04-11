@@ -9,7 +9,8 @@ export interface JunitSuite {
   tests: number
   succeeded: number
   skipped: number
-  failed: number
+  failures: number
+  errors: number
   durationSec: number
 }
 
