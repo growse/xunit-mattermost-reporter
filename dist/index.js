@@ -8327,6 +8327,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const github_1 = __webpack_require__(469);
 const core = __importStar(__webpack_require__(470));
 const bent_1 = __importDefault(__webpack_require__(231));
+const url_1 = __webpack_require__(835);
 function postReportToMatterMost(mattermostWebhookUrl, report) {
     return __awaiter(this, void 0, void 0, function* () {
         const mmBody = {
@@ -8341,13 +8342,17 @@ function postReportToMatterMost(mattermostWebhookUrl, report) {
 }
 exports.postReportToMatterMost = postReportToMatterMost;
 function renderReportToMarkdown(report) {
+    const ghBaseUrl = new url_1.URL('https://github.com');
+    const repoUrl = new url_1.URL(`${encodeURIComponent(github_1.context.repo.owner)}/${encodeURIComponent(github_1.context.repo.repo)}`, ghBaseUrl);
+    const actorProfileUrl = new url_1.URL(encodeURIComponent(github_1.context.actor), ghBaseUrl);
+    const actorAvatarUrl = new url_1.URL(`${encodeURIComponent(github_1.context.actor)}.png?size=18`, ghBaseUrl);
     return {
         author_name: 'Xunit Mattermost reporter on ',
         color: '#00aa00',
         fallback: 'Fallback text',
         fields: [],
-        text: `Xunit report for ${report.testsuites.length} test suites on ${github_1.context.workflow}`,
-        title: `context items: Action=${github_1.context.action} Actor=${github_1.context.actor} Eventname=${github_1.context.eventName} Ref=${github_1.context.ref} Sha=${github_1.context.sha} Workflow=${github_1.context.workflow} Repo=${github_1.context.repo.repo} Owner=${github_1.context.repo.owner}`
+        text: `![${github_1.context.actor} avatar](${actorAvatarUrl}) [${github_1.context.actor}](${actorProfileUrl}) ran some tests ran on [${github_1.context.repo.owner}/${github_1.context.repo.repo}](${repoUrl}) as part of the ${github_1.context.workflow}workflow.`,
+        title: `GH Context ${JSON.stringify(github_1.context)} ${JSON.stringify(report)}`
     };
 }
 exports.renderReportToMarkdown = renderReportToMarkdown;

@@ -2,6 +2,7 @@ import {context} from '@actions/github'
 import {JunitResults} from './xunit'
 import * as core from '@actions/core'
 import bent from 'bent'
+import {URL} from 'url'
 
 export interface MattermostAttachmentField {
   short: boolean
@@ -40,12 +41,24 @@ export async function postReportToMatterMost(
 export function renderReportToMarkdown(
   report: JunitResults
 ): MattermostAttachment {
+  const ghBaseUrl = new URL('https://github.com')
+  const repoUrl = new URL(
+    `${encodeURIComponent(context.repo.owner)}/${encodeURIComponent(
+      context.repo.repo
+    )}`,
+    ghBaseUrl
+  )
+  const actorProfileUrl = new URL(encodeURIComponent(context.actor), ghBaseUrl)
+  const actorAvatarUrl = new URL(
+    `${encodeURIComponent(context.actor)}.png?size=18`,
+    ghBaseUrl
+  )
   return {
     author_name: 'Xunit Mattermost reporter on ',
     color: '#00aa00',
     fallback: 'Fallback text',
     fields: [],
-    text: `Some tests ran on Xunit report for ${report.testsuites.length} test suites on ${context.workflow}`,
-    title: `context items: Action=${context.action} Actor=${context.actor} Eventname=${context.eventName} Ref=${context.ref} Sha=${context.sha} Workflow=${context.workflow} Repo=${context.repo.repo} Owner=${context.repo.owner}`
+    text: `![${context.actor} avatar](${actorAvatarUrl}) [${context.actor}](${actorProfileUrl}) ran some tests ran on [${context.repo.owner}/${context.repo.repo}](${repoUrl}) as part of the ${context.workflow}workflow.`,
+    title: `GH Context ${JSON.stringify(context)} ${JSON.stringify(report)}`
   }
 }
