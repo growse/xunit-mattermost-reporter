@@ -98,20 +98,23 @@ export function renderReportToMarkdown(
     }
   ]
   const colour = testsFailed + testsErrored === 0 ? '#00aa00' : 'aa0000'
+  const title =
+    testsFailed + testsErrored === 0
+      ? ':tada: Tests passed'
+      : ':rotating_light: Tests failed'
+  const text = `![${context.actor} avatar](${actorAvatarUrl}) [${
+    context.actor
+  }](${actorProfileUrl}) ran some tests ran on [${thingTitle}](${
+    context.payload.pull_request?.html_url ?? 'https://example.com'
+  }) at [${context.repo.owner}/${
+    context.repo.repo
+  }](${repoUrl}) as part of the [${context.workflow}](${workflowUrl}) workflow.`
   return {
     author_name: 'Xunit Mattermost Reporter',
     color: colour,
-    fallback: 'Fallback text',
+    fallback: `${title} - ${text}`,
     fields: metricFields,
-    text: `![${context.actor} avatar](${actorAvatarUrl}) [${
-      context.actor
-    }](${actorProfileUrl}) ran some tests ran on [${thingTitle}](${
-      context.payload.pull_request?.html_url ?? 'https://example.com'
-    }) at [${context.repo.owner}/${
-      context.repo.repo
-    }](${repoUrl}) as part of the [${
-      context.workflow
-    }](${workflowUrl}) workflow.`,
-    title: `title`
+    text,
+    title
   }
 }
