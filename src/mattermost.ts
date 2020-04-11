@@ -29,8 +29,8 @@ export async function postReportToMatterMost(
 ): Promise<string> {
   const mmBody = {
     username: 'Github Actions Runner',
-    text: 'test',
-    props: {attachments: [renderReportToMarkdown(report)]}
+    text: '',
+    attachments: [renderReportToMarkdown(report)]
   }
   core.debug(`MM payload: ${JSON.stringify(mmBody)}`)
   const mmPost = bent('string', 'POST')
@@ -41,11 +41,11 @@ export function renderReportToMarkdown(
   report: JunitResults
 ): MattermostAttachment {
   return {
-    author_name: 'Xunit Mattermost reporter',
+    author_name: 'Xunit Mattermost reporter on ',
     color: '#00aa00',
     fallback: 'Fallback text',
     fields: [],
-    text: `Xunit report for ${report.testsuites.length} test suites on ${context.workflow}`,
-    title: 'Test Title'
+    text: `Some tests ran on Xunit report for ${report.testsuites.length} test suites on ${context.workflow}`,
+    title: `context items: Action=${context.action} Actor=${context.actor} Eventname=${context.eventName} Ref=${context.ref} Sha=${context.sha} Workflow=${context.workflow} Repo=${context.repo.repo} Owner=${context.repo.owner}`
   }
 }

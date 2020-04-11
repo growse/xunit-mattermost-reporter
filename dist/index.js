@@ -8331,8 +8331,8 @@ function postReportToMatterMost(mattermostWebhookUrl, report) {
     return __awaiter(this, void 0, void 0, function* () {
         const mmBody = {
             username: 'Github Actions Runner',
-            text: 'test',
-            props: { attachments: [renderReportToMarkdown(report)] }
+            text: '',
+            attachments: [renderReportToMarkdown(report)]
         };
         core.debug(`MM payload: ${JSON.stringify(mmBody)}`);
         const mmPost = bent_1.default('string', 'POST');
@@ -8342,12 +8342,12 @@ function postReportToMatterMost(mattermostWebhookUrl, report) {
 exports.postReportToMatterMost = postReportToMatterMost;
 function renderReportToMarkdown(report) {
     return {
-        author_name: 'Xunit Mattermost reporter',
+        author_name: 'Xunit Mattermost reporter on ',
         color: '#00aa00',
         fallback: 'Fallback text',
         fields: [],
         text: `Xunit report for ${report.testsuites.length} test suites on ${github_1.context.workflow}`,
-        title: 'Test Title'
+        title: `context items: Action=${github_1.context.action} Actor=${github_1.context.actor} Eventname=${github_1.context.eventName} Ref=${github_1.context.ref} Sha=${github_1.context.sha} Workflow=${github_1.context.workflow} Repo=${github_1.context.repo.repo} Owner=${github_1.context.repo.owner}`
     };
 }
 exports.renderReportToMarkdown = renderReportToMarkdown;
