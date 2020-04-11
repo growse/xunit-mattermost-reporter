@@ -6,6 +6,11 @@ import Parser from 'junitxml-to-javascript'
 
 export interface JunitSuite {
   name: String
+  tests: number
+  succeeded: number
+  skipped: number
+  failed: number
+  durationSec: number
 }
 
 export interface JunitResults {
