@@ -8386,6 +8386,7 @@ function renderReportToMattermostAttachment(report) {
     const summary = summarizeReport(report);
     const allSucceeded = summary.errors === 0;
     const repoUrl = (_a = github_1.context.payload.repository) === null || _a === void 0 ? void 0 : _a.html_url;
+    const branchUrl = getBranchUrl(repoUrl !== null && repoUrl !== void 0 ? repoUrl : '', github_1.context.ref);
     const actorProfileUrl = (_b = github_1.context.payload.sender) === null || _b === void 0 ? void 0 : _b.html_url;
     const actorAvatarUrl = (_c = github_1.context.payload.sender) === null || _c === void 0 ? void 0 : _c.avatar_url.concat('&size=18');
     const workflowUrl = new url_1.URL(`${repoUrl}/actions?query=workflow%3A${encodeURIComponent(github_1.context.workflow)}`);
@@ -8397,7 +8398,7 @@ function renderReportToMattermostAttachment(report) {
         ? 'Test run success'
         : 'Test run failure';
     const resultsTable = generateTableMarkdownFromReport(report);
-    const notificationText = `![${github_1.context.actor} avatar](${actorAvatarUrl}) [${github_1.context.actor}](${actorProfileUrl}) ran some tests ran on [${thingTitle}](${(_e = (_d = github_1.context.payload.pull_request) === null || _d === void 0 ? void 0 : _d.html_url) !== null && _e !== void 0 ? _e : repoUrl}) at [${github_1.context.repo.owner}/${github_1.context.repo.repo}](${repoUrl}) as part of the [${github_1.context.workflow}](${workflowUrl}) workflow.\n\n${resultsTable}`;
+    const notificationText = `![${github_1.context.actor} avatar](${actorAvatarUrl}) [${github_1.context.actor}](${actorProfileUrl}) ran some tests ran on [${thingTitle}](${(_e = (_d = github_1.context.payload.pull_request) === null || _d === void 0 ? void 0 : _d.html_url) !== null && _e !== void 0 ? _e : branchUrl}) at [${github_1.context.repo.owner}/${github_1.context.repo.repo}](${repoUrl}) as part of the [${github_1.context.workflow}](${workflowUrl}) workflow.\n\n${resultsTable}`;
     return {
         author_name: 'Xunit Mattermost Reporter',
         color: colour,
@@ -8407,6 +8408,14 @@ function renderReportToMattermostAttachment(report) {
     };
 }
 exports.renderReportToMattermostAttachment = renderReportToMattermostAttachment;
+function getBranchUrl(repoUrl, ref) {
+    if (ref.startsWith('ref/heads/')) {
+        return new url_1.URL(ref.substring(10), repoUrl).toString();
+    }
+    else {
+        return new url_1.URL(ref, repoUrl).toString();
+    }
+}
 
 
 /***/ }),

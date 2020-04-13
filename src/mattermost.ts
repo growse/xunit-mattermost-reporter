@@ -93,6 +93,7 @@ export function renderReportToMattermostAttachment(
   const allSucceeded = summary.errors === 0
 
   const repoUrl = context.payload.repository?.html_url
+  const branchUrl = getBranchUrl(repoUrl ?? '', context.ref)
   const actorProfileUrl = context.payload.sender?.html_url
   const actorAvatarUrl = context.payload.sender?.avatar_url.concat('&size=18')
   const workflowUrl = new URL(
@@ -113,7 +114,7 @@ export function renderReportToMattermostAttachment(
   const notificationText = `![${context.actor} avatar](${actorAvatarUrl}) [${
     context.actor
   }](${actorProfileUrl}) ran some tests ran on [${thingTitle}](${
-    context.payload.pull_request?.html_url ?? repoUrl
+    context.payload.pull_request?.html_url ?? branchUrl
   }) at [${context.repo.owner}/${
     context.repo.repo
   }](${repoUrl}) as part of the [${
@@ -126,5 +127,13 @@ export function renderReportToMattermostAttachment(
     fallback: `${notificationTitle} - ${notificationText}`,
     text: notificationText,
     title: notificationTitle
+  }
+}
+
+function getBranchUrl(repoUrl: string, ref: string): string {
+  if (ref.startsWith('ref/heads/')) {
+    return new URL(ref.substring(10), repoUrl).toString()
+  } else {
+    return new URL(ref, repoUrl).toString()
   }
 }
