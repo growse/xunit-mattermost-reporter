@@ -52,7 +52,7 @@ export function generateTableMarkdownFromReport(report: JunitResults): string {
       })
     )
     .concat(
-      `| **Total (${summary.duration}s** | **${summary.tests} tests, ${summary.succeeded} passed, ${summary.errors} failed, ${summary.skipped} skipped** |`
+      `| **Total (${summary.duration}s)** | **${summary.tests} tests, ${summary.succeeded} passed, ${summary.errors} failed, ${summary.skipped} skipped** |`
     )
     .join('\n')
 }
