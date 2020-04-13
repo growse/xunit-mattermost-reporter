@@ -4,12 +4,6 @@ import * as core from '@actions/core'
 import bent from 'bent'
 import {URL} from 'url'
 
-export interface MattermostAttachmentField {
-  short: boolean
-  title: string
-  value: string
-}
-
 export interface MattermostAttachment {
   fallback: string
   color: string
@@ -20,7 +14,6 @@ export interface MattermostAttachment {
   author_link?: URL
   title: string
   title_link?: URL
-  fields: MattermostAttachmentField[]
   image_url?: URL
 }
 
@@ -38,12 +31,66 @@ export async function postReportToMatterMost(
   return mmPost(mattermostWebhookUrl, mmBody)
 }
 
-export function renderReportToMarkdown(
-  report: JunitResults
-): MattermostAttachment {
+interface JunitSummary {
+  tests: number
+  succeeded: number
+  skipped: number
+  errors: number
+  duration: number
+}
+
+export function generateTableMarkdownFromReport(report: JunitResults): string {
+  const summary = summarizeReport(report)
+  return ['| Test suite | Results |', '|:---|:---|']
+    .concat(
+      report.testsuites.map(suite => {
+        if (suite.errors === 0) {
+          return `| ${suite.name} (${suite.durationSec}s) | :tada: ${suite.tests} tests, ${suite.succeeded} passed, ${suite.skipped} skipped |`
+        } else {
+          return `| ${suite.name} (${suite.durationSec}s) | :rotating_light: ${suite.tests} tests, ${suite.errors} failed |`
+        }
+      })
+    )
+    .concat(
+      `| **Total (${summary.duration}s** | **${summary.tests} tests, ${summary.succeeded} passed, ${summary.errors} failed, ${summary.skipped} skipped** |`
+    )
+    .join('\n')
+}
+
+export function summarizeReport(report: JunitResults): JunitSummary {
   const sumFn = (sum: number, current: number): number => {
     return sum + current
   }
+  const testsRun = report.testsuites
+    .map(suite => suite.tests ?? 0)
+    .reduce(sumFn)
+  const testsSkipped = report.testsuites
+    .map(suite => suite.skipped ?? 0)
+    .reduce(sumFn)
+  const testsErrored = report.testsuites
+    .map(suite => suite.errors ?? 0)
+    .reduce(sumFn)
+  const testsSucceeded = report.testsuites
+    .map(suite => suite.succeeded ?? 0)
+    .reduce(sumFn)
+  const testDuration = report.testsuites
+    .map(suite => suite.durationSec ?? 0)
+    .reduce(sumFn)
+  return {
+    tests: testsRun,
+    succeeded: testsSucceeded,
+    skipped: testsSkipped,
+    errors: testsErrored,
+    duration: testDuration
+  }
+}
+
+export function renderReportToMarkdown(
+  report: JunitResults
+): MattermostAttachment {
+  const summary = summarizeReport(report)
+  const allSucceeded = summary.errors === 0
+
   const repoUrl = context.payload.repository?.html_url
   const actorProfileUrl = context.payload.sender?.html_url
   const actorAvatarUrl = context.payload.sender?.avatar_url.concat('&size=18')
@@ -55,66 +102,28 @@ export function renderReportToMarkdown(
   const thingTitle = context.payload.pull_request
     ? `#${context.payload.pull_request.number} ${context.payload.pull_request.title}`
     : context.ref
-  const testsFailed = report.testsuites
-    .map(suite => suite.failures ?? 0)
-    .reduce(sumFn, 0)
-  const testsErrored = report.testsuites
-    .map(suite => suite.errors ?? 0)
-    .reduce(sumFn, 0)
-  const metricFields = [
-    {
-      short: true,
-      title: 'Tests Run',
-      value: report.testsuites
-        .map(suite => suite.tests ?? 0)
-        .reduce(sumFn)
-        .toString()
-    },
-    {
-      short: true,
-      title: 'Tests Succeeded',
-      value: report.testsuites
-        .map(suite => suite.succeeded ?? 0)
-        .reduce(sumFn)
-        .toString()
-    },
-    {
-      short: true,
-      title: 'Tests Skipped',
-      value: report.testsuites
-        .map(suite => suite.skipped ?? 0)
-        .reduce(sumFn)
-        .toString()
-    },
-    {short: true, title: 'Tests Failed', value: testsFailed.toString()},
-    {short: true, title: 'Tests Errored', value: testsErrored.toString()},
-    {
-      short: true,
-      title: 'Duration',
-      value: report.testsuites
-        .map(suite => suite.durationSec)
-        .reduce(sumFn)
-        .toString()
-    }
-  ]
-  const colour = testsFailed + testsErrored === 0 ? '#00aa00' : 'aa0000'
-  const title =
-    testsFailed + testsErrored === 0
-      ? ':tada: Tests passed'
-      : ':rotating_light: Tests failed'
-  const text = `![${context.actor} avatar](${actorAvatarUrl}) [${
+
+  const colour = allSucceeded ? '#00aa00' : '#aa0000'
+  const notificationTitle = allSucceeded
+    ? 'Test run success'
+    : 'Test run failure'
+
+  const resultsTable = generateTableMarkdownFromReport(report)
+  const notificationText = `![${context.actor} avatar](${actorAvatarUrl}) [${
     context.actor
   }](${actorProfileUrl}) ran some tests ran on [${thingTitle}](${
     context.payload.pull_request?.html_url ?? 'https://example.com'
   }) at [${context.repo.owner}/${
     context.repo.repo
-  }](${repoUrl}) as part of the [${context.workflow}](${workflowUrl}) workflow.`
+  }](${repoUrl}) as part of the [${
+    context.workflow
+  }](${workflowUrl}) workflow.\n${resultsTable}`
+
   return {
     author_name: 'Xunit Mattermost Reporter',
     color: colour,
-    fallback: `${title} - ${text}`,
-    fields: metricFields,
-    text,
-    title
+    fallback: `${notificationTitle} - ${notificationText}`,
+    text: notificationText,
+    title: notificationTitle
   }
 }

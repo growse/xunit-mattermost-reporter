@@ -8339,11 +8339,53 @@ function postReportToMatterMost(mattermostWebhookUrl, report) {
     });
 }
 exports.postReportToMatterMost = postReportToMatterMost;
-function renderReportToMarkdown(report) {
-    var _a, _b, _c, _d, _e;
+function generateTableMarkdownFromReport(report) {
+    const summary = summarizeReport(report);
+    return ['| Test suite | Results |', '|:---|:---|']
+        .concat(report.testsuites.map(suite => {
+        if (suite.errors === 0) {
+            return `| ${suite.name} (${suite.durationSec}s) | :tada: ${suite.tests} tests, ${suite.succeeded} passed, ${suite.skipped} skipped |`;
+        }
+        else {
+            return `| ${suite.name} (${suite.durationSec}s) | :rotating_light: ${suite.tests} tests, ${suite.errors} failed |`;
+        }
+    }))
+        .concat(`| **Total (${summary.duration}s** | **${summary.tests} tests, ${summary.succeeded} passed, ${summary.errors} failed, ${summary.skipped} skipped** |`)
+        .join('\n');
+}
+exports.generateTableMarkdownFromReport = generateTableMarkdownFromReport;
+function summarizeReport(report) {
     const sumFn = (sum, current) => {
         return sum + current;
     };
+    const testsRun = report.testsuites
+        .map(suite => { var _a; return (_a = suite.tests) !== null && _a !== void 0 ? _a : 0; })
+        .reduce(sumFn);
+    const testsSkipped = report.testsuites
+        .map(suite => { var _a; return (_a = suite.skipped) !== null && _a !== void 0 ? _a : 0; })
+        .reduce(sumFn);
+    const testsErrored = report.testsuites
+        .map(suite => { var _a; return (_a = suite.errors) !== null && _a !== void 0 ? _a : 0; })
+        .reduce(sumFn);
+    const testsSucceeded = report.testsuites
+        .map(suite => { var _a; return (_a = suite.succeeded) !== null && _a !== void 0 ? _a : 0; })
+        .reduce(sumFn);
+    const testDuration = report.testsuites
+        .map(suite => { var _a; return (_a = suite.durationSec) !== null && _a !== void 0 ? _a : 0; })
+        .reduce(sumFn);
+    return {
+        tests: testsRun,
+        succeeded: testsSucceeded,
+        skipped: testsSkipped,
+        errors: testsErrored,
+        duration: testDuration
+    };
+}
+exports.summarizeReport = summarizeReport;
+function renderReportToMarkdown(report) {
+    var _a, _b, _c, _d, _e;
+    const summary = summarizeReport(report);
+    const allSucceeded = summary.errors === 0;
     const repoUrl = (_a = github_1.context.payload.repository) === null || _a === void 0 ? void 0 : _a.html_url;
     const actorProfileUrl = (_b = github_1.context.payload.sender) === null || _b === void 0 ? void 0 : _b.html_url;
     const actorAvatarUrl = (_c = github_1.context.payload.sender) === null || _c === void 0 ? void 0 : _c.avatar_url.concat('&size=18');
@@ -8351,60 +8393,18 @@ function renderReportToMarkdown(report) {
     const thingTitle = github_1.context.payload.pull_request
         ? `#${github_1.context.payload.pull_request.number} ${github_1.context.payload.pull_request.title}`
         : github_1.context.ref;
-    const testsFailed = report.testsuites
-        .map(suite => { var _a; return (_a = suite.failures) !== null && _a !== void 0 ? _a : 0; })
-        .reduce(sumFn, 0);
-    const testsErrored = report.testsuites
-        .map(suite => { var _a; return (_a = suite.errors) !== null && _a !== void 0 ? _a : 0; })
-        .reduce(sumFn, 0);
-    const metricFields = [
-        {
-            short: true,
-            title: 'Tests Run',
-            value: report.testsuites
-                .map(suite => { var _a; return (_a = suite.tests) !== null && _a !== void 0 ? _a : 0; })
-                .reduce(sumFn)
-                .toString()
-        },
-        {
-            short: true,
-            title: 'Tests Succeeded',
-            value: report.testsuites
-                .map(suite => { var _a; return (_a = suite.succeeded) !== null && _a !== void 0 ? _a : 0; })
-                .reduce(sumFn)
-                .toString()
-        },
-        {
-            short: true,
-            title: 'Tests Skipped',
-            value: report.testsuites
-                .map(suite => { var _a; return (_a = suite.skipped) !== null && _a !== void 0 ? _a : 0; })
-                .reduce(sumFn)
-                .toString()
-        },
-        { short: true, title: 'Tests Failed', value: testsFailed.toString() },
-        { short: true, title: 'Tests Errored', value: testsErrored.toString() },
-        {
-            short: true,
-            title: 'Duration',
-            value: report.testsuites
-                .map(suite => suite.durationSec)
-                .reduce(sumFn)
-                .toString()
-        }
-    ];
-    const colour = testsFailed + testsErrored === 0 ? '#00aa00' : 'aa0000';
-    const title = testsFailed + testsErrored === 0
-        ? ':tada: Tests passed'
-        : ':rotating_light: Tests failed';
-    const text = `![${github_1.context.actor} avatar](${actorAvatarUrl}) [${github_1.context.actor}](${actorProfileUrl}) ran some tests ran on [${thingTitle}](${(_e = (_d = github_1.context.payload.pull_request) === null || _d === void 0 ? void 0 : _d.html_url) !== null && _e !== void 0 ? _e : 'https://example.com'}) at [${github_1.context.repo.owner}/${github_1.context.repo.repo}](${repoUrl}) as part of the [${github_1.context.workflow}](${workflowUrl}) workflow.`;
+    const colour = allSucceeded ? '#00aa00' : '#aa0000';
+    const notificationTitle = allSucceeded
+        ? 'Test run success'
+        : 'Test run failure';
+    const resultsTable = generateTableMarkdownFromReport(report);
+    const notificationText = `![${github_1.context.actor} avatar](${actorAvatarUrl}) [${github_1.context.actor}](${actorProfileUrl}) ran some tests ran on [${thingTitle}](${(_e = (_d = github_1.context.payload.pull_request) === null || _d === void 0 ? void 0 : _d.html_url) !== null && _e !== void 0 ? _e : 'https://example.com'}) at [${github_1.context.repo.owner}/${github_1.context.repo.repo}](${repoUrl}) as part of the [${github_1.context.workflow}](${workflowUrl}) workflow.\n${resultsTable}`;
     return {
         author_name: 'Xunit Mattermost Reporter',
         color: colour,
-        fallback: `${title} - ${text}`,
-        fields: metricFields,
-        text,
-        title
+        fallback: `${notificationTitle} - ${notificationText}`,
+        text: notificationText,
+        title: notificationTitle
     };
 }
 exports.renderReportToMarkdown = renderReportToMarkdown;
