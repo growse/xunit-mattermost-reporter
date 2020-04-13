@@ -8334,6 +8334,7 @@ function postReportToMatterMost(mattermostWebhookUrl, report) {
             attachments: [renderReportToMattermostAttachment(report)]
         };
         core.info(`MM payload: ${JSON.stringify(mmBody)}`);
+        core.debug(JSON.stringify(github_1.context));
         const mmPost = bent_1.default('string', 'POST');
         return mmPost(mattermostWebhookUrl, mmBody);
     });

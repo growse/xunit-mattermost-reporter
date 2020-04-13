@@ -27,6 +27,7 @@ export async function postReportToMatterMost(
     attachments: [renderReportToMattermostAttachment(report)]
   }
   core.info(`MM payload: ${JSON.stringify(mmBody)}`)
+  core.debug(JSON.stringify(context))
   const mmPost = bent('string', 'POST')
   return mmPost(mattermostWebhookUrl, mmBody)
 }
