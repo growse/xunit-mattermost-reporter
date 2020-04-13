@@ -26,7 +26,7 @@ export async function postReportToMatterMost(
     text: '',
     attachments: [renderReportToMattermostAttachment(report)]
   }
-  core.debug(`MM payload: ${JSON.stringify(mmBody)}`)
+  core.info(`MM payload: ${JSON.stringify(mmBody)}`)
   const mmPost = bent('string', 'POST')
   return mmPost(mattermostWebhookUrl, mmBody)
 }
@@ -112,12 +112,12 @@ export function renderReportToMattermostAttachment(
   const notificationText = `![${context.actor} avatar](${actorAvatarUrl}) [${
     context.actor
   }](${actorProfileUrl}) ran some tests ran on [${thingTitle}](${
-    context.payload.pull_request?.html_url ?? 'https://example.com'
+    context.payload.pull_request?.html_url ?? repoUrl
   }) at [${context.repo.owner}/${
     context.repo.repo
   }](${repoUrl}) as part of the [${
     context.workflow
-  }](${workflowUrl}) workflow.\n${resultsTable}`
+  }](${workflowUrl}) workflow.\n\n${resultsTable}`
 
   return {
     author_name: 'Xunit Mattermost Reporter',

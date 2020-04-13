@@ -8333,7 +8333,7 @@ function postReportToMatterMost(mattermostWebhookUrl, report) {
             text: '',
             attachments: [renderReportToMattermostAttachment(report)]
         };
-        core.debug(`MM payload: ${JSON.stringify(mmBody)}`);
+        core.info(`MM payload: ${JSON.stringify(mmBody)}`);
         const mmPost = bent_1.default('string', 'POST');
         return mmPost(mattermostWebhookUrl, mmBody);
     });
@@ -8396,7 +8396,7 @@ function renderReportToMattermostAttachment(report) {
         ? 'Test run success'
         : 'Test run failure';
     const resultsTable = generateTableMarkdownFromReport(report);
-    const notificationText = `![${github_1.context.actor} avatar](${actorAvatarUrl}) [${github_1.context.actor}](${actorProfileUrl}) ran some tests ran on [${thingTitle}](${(_e = (_d = github_1.context.payload.pull_request) === null || _d === void 0 ? void 0 : _d.html_url) !== null && _e !== void 0 ? _e : 'https://example.com'}) at [${github_1.context.repo.owner}/${github_1.context.repo.repo}](${repoUrl}) as part of the [${github_1.context.workflow}](${workflowUrl}) workflow.\n${resultsTable}`;
+    const notificationText = `![${github_1.context.actor} avatar](${actorAvatarUrl}) [${github_1.context.actor}](${actorProfileUrl}) ran some tests ran on [${thingTitle}](${(_e = (_d = github_1.context.payload.pull_request) === null || _d === void 0 ? void 0 : _d.html_url) !== null && _e !== void 0 ? _e : repoUrl}) at [${github_1.context.repo.owner}/${github_1.context.repo.repo}](${repoUrl}) as part of the [${github_1.context.workflow}](${workflowUrl}) workflow.\n\n${resultsTable}`;
     return {
         author_name: 'Xunit Mattermost Reporter',
         color: colour,
