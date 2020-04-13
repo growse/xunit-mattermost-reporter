@@ -8350,7 +8350,7 @@ function generateTableMarkdownFromReport(report) {
             return `| ${suite.name} (${suite.durationSec}s) | :rotating_light: ${suite.tests} tests, ${suite.errors} failed |`;
         }
     }))
-        .concat(`| **Total (${summary.duration}s** | **${summary.tests} tests, ${summary.succeeded} passed, ${summary.errors} failed, ${summary.skipped} skipped** |`)
+        .concat(`| **Total (${summary.duration}s)** | **${summary.tests} tests, ${summary.succeeded} passed, ${summary.errors} failed, ${summary.skipped} skipped** |`)
         .join('\n');
 }
 exports.generateTableMarkdownFromReport = generateTableMarkdownFromReport;
