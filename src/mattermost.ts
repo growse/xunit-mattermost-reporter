@@ -24,7 +24,7 @@ export async function postReportToMatterMost(
   const mmBody = {
     username: 'Github Actions Runner',
     text: '',
-    attachments: [renderReportToMarkdown(report)]
+    attachments: [renderReportToMattermostAttachment(report)]
   }
   core.debug(`MM payload: ${JSON.stringify(mmBody)}`)
   const mmPost = bent('string', 'POST')
@@ -39,7 +39,7 @@ interface JunitSummary {
   duration: number
 }
 
-export function generateTableMarkdownFromReport(report: JunitResults): string {
+function generateTableMarkdownFromReport(report: JunitResults): string {
   const summary = summarizeReport(report)
   return ['| Test suite | Results |', '|:---|:---|']
     .concat(
@@ -57,7 +57,7 @@ export function generateTableMarkdownFromReport(report: JunitResults): string {
     .join('\n')
 }
 
-export function summarizeReport(report: JunitResults): JunitSummary {
+function summarizeReport(report: JunitResults): JunitSummary {
   const sumFn = (sum: number, current: number): number => {
     return sum + current
   }
@@ -85,7 +85,7 @@ export function summarizeReport(report: JunitResults): JunitSummary {
   }
 }
 
-export function renderReportToMarkdown(
+export function renderReportToMattermostAttachment(
   report: JunitResults
 ): MattermostAttachment {
   const summary = summarizeReport(report)

@@ -8331,7 +8331,7 @@ function postReportToMatterMost(mattermostWebhookUrl, report) {
         const mmBody = {
             username: 'Github Actions Runner',
             text: '',
-            attachments: [renderReportToMarkdown(report)]
+            attachments: [renderReportToMattermostAttachment(report)]
         };
         core.debug(`MM payload: ${JSON.stringify(mmBody)}`);
         const mmPost = bent_1.default('string', 'POST');
@@ -8353,7 +8353,6 @@ function generateTableMarkdownFromReport(report) {
         .concat(`| **Total (${summary.duration}s)** | **${summary.tests} tests, ${summary.succeeded} passed, ${summary.errors} failed, ${summary.skipped} skipped** |`)
         .join('\n');
 }
-exports.generateTableMarkdownFromReport = generateTableMarkdownFromReport;
 function summarizeReport(report) {
     const sumFn = (sum, current) => {
         return sum + current;
@@ -8381,8 +8380,7 @@ function summarizeReport(report) {
         duration: testDuration
     };
 }
-exports.summarizeReport = summarizeReport;
-function renderReportToMarkdown(report) {
+function renderReportToMattermostAttachment(report) {
     var _a, _b, _c, _d, _e;
     const summary = summarizeReport(report);
     const allSucceeded = summary.errors === 0;
@@ -8407,7 +8405,7 @@ function renderReportToMarkdown(report) {
         title: notificationTitle
     };
 }
-exports.renderReportToMarkdown = renderReportToMarkdown;
+exports.renderReportToMattermostAttachment = renderReportToMattermostAttachment;
 
 
 /***/ }),
