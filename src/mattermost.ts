@@ -3,6 +3,7 @@ import {JunitResults} from './xunit'
 import * as core from '@actions/core'
 import bent from 'bent'
 import {URL} from 'url'
+import path from 'path'
 
 export interface MattermostAttachment {
   fallback: string
@@ -92,10 +93,15 @@ export function renderReportToMattermostAttachment(
   const summary = summarizeReport(report)
   const allSucceeded = summary.errors === 0
 
+  const githubBaseUrl = new URL('https://github.com/')
   const repoUrl = context.payload.repository?.html_url
-  const branchUrl = getBranchUrl(repoUrl ?? '', context.ref)
-  const actorProfileUrl = context.payload.sender?.html_url
-  const actorAvatarUrl = context.payload.sender?.avatar_url.concat('&size=18')
+    ? new URL(context.payload.repository.html_url)
+    : new URL(`${context.repo.owner}/${context.repo.repo}`, githubBaseUrl)
+  const branchUrl = getBranchUrl(repoUrl, context.ref)
+  const actorProfileUrl = new URL(context.payload.sender?.html_url)
+  const actorAvatarUrl = new URL(
+    context.payload.sender?.avatar_url.concat('&size=18')
+  )
   const workflowUrl = new URL(
     `${repoUrl}/actions?query=workflow%3A${encodeURIComponent(
       context.workflow
@@ -113,9 +119,8 @@ export function renderReportToMattermostAttachment(
   const resultsTable = generateTableMarkdownFromReport(report)
   const notificationText = `![${context.actor} avatar](${actorAvatarUrl}) [${
     context.actor
-  }](${actorProfileUrl}) ran some tests ran on [${thingTitle}](${
-    context.payload.pull_request?.html_url ?? branchUrl
-  }) at [${context.repo.owner}/${
+  }](${actorProfileUrl}) ran some tests ran on [${thingTitle}](${context.payload
+    .pull_request?.html_url ?? branchUrl}) at [${context.repo.owner}/${
     context.repo.repo
   }](${repoUrl}) as part of the [${
     context.workflow
@@ -130,10 +135,10 @@ export function renderReportToMattermostAttachment(
   }
 }
 
-function getBranchUrl(repoUrl: string, ref: string): string {
-  if (ref.startsWith('ref/heads/')) {
-    return new URL(ref.substring(10), repoUrl).toString()
-  } else {
-    return new URL(ref, repoUrl).toString()
-  }
+function getBranchUrl(repoUrl: URL, ref: string): string {
+  const refName = ref.startsWith('refs/heads/') ? ref.substr(10) : ref
+  return new URL(
+    path.join(repoUrl.pathname, 'tree', refName),
+    repoUrl
+  ).toString()
 }
