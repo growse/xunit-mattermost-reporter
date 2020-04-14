@@ -29,7 +29,8 @@
     "@actions/github": "^2.1.1",
     "@types/bent": "^7.0.2",
     "bent": "^7.3.0",
-    "junitxml-to-javascript": "^1.1.4"
+    "junitxml-to-javascript": "^1.1.4",
+    "moment": "^2.24.0"
   },
   "devDependencies": {
     "@types/jest": "^25.2.1",

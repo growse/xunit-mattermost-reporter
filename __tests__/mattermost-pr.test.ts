@@ -33,7 +33,7 @@ describe('Test mattermost renderings', () => {
       expect(message.color).toEqual('#00aa00')
       expect(message.title).toEqual('Test run success')
       expect(message.text).toEqual(
-        '![test-actor avatar](https://example.com/sender.png&size=18) [test-actor](https://example.com/sender) ran some tests ran on [#1 PR title](https://example.com/test-owner/test-repo/pulls/1) at [test-owner/test-repo](https://example.com/test-owner/test-repo) as part of the [test-workflow](https://example.com/test-owner/test-repo/actions?query=workflow%3Atest-workflow) workflow.\n\n| Test suite | Results |\n|:---|:---|\n| org.owntracks.android.data.repos.MemoryContactsRepoTest (26.802s) | :tada: 5 tests, 5 passed, 0 skipped |\n| **Total (26.802s)** | **5 tests, 5 passed, 0 failed, 0 skipped** |'
+        '![test-actor avatar](https://example.com/sender.png&size=18) [test-actor](https://example.com/sender) ran some tests ran on [#1 PR title](https://example.com/test-owner/test-repo/pulls/1) at [test-owner/test-repo](https://example.com/test-owner/test-repo) as part of the [test-workflow](https://example.com/test-owner/test-repo/actions?query=workflow%3Atest-workflow) workflow.\n\n| Test suite | Results |\n|:---|:---|\n| `org.owntracks.android.data.repos.MemoryContactsRepoTest` (27 seconds) | :tada: 5 tests, 5 passed, 0 skipped |\n| **Total (27 seconds)** | **5 tests, 5 passed, 0 failed, 0 skipped** |'
       )
     })
 
@@ -44,7 +44,7 @@ describe('Test mattermost renderings', () => {
       expect(message.color).toEqual('#aa0000')
       expect(message.title).toEqual('Test run failure')
       expect(message.text).toEqual(
-        '![test-actor avatar](https://example.com/sender.png&size=18) [test-actor](https://example.com/sender) ran some tests ran on [#1 PR title](https://example.com/test-owner/test-repo/pulls/1) at [test-owner/test-repo](https://example.com/test-owner/test-repo) as part of the [test-workflow](https://example.com/test-owner/test-repo/actions?query=workflow%3Atest-workflow) workflow.\n\n| Test suite | Results |\n|:---|:---|\n| org.owntracks.android.data.repos.MemoryContactsRepoTest (26.802s) | :tada: 5 tests, 5 passed, 0 skipped |\n| org.owntracks.android.support.ParserTest (24.701s) | :tada: 11 tests, 11 passed, 0 skipped |\n| org.owntracks.android.services.MessageProcessorEndpointHttpTest (2.117s) | :rotating_light: 7 tests, 1 failed |\n| **Total (53.62s)** | **23 tests, 22 passed, 1 failed, 0 skipped** |'
+        '![test-actor avatar](https://example.com/sender.png&size=18) [test-actor](https://example.com/sender) ran some tests ran on [#1 PR title](https://example.com/test-owner/test-repo/pulls/1) at [test-owner/test-repo](https://example.com/test-owner/test-repo) as part of the [test-workflow](https://example.com/test-owner/test-repo/actions?query=workflow%3Atest-workflow) workflow.\n\n| Test suite | Results |\n|:---|:---|\n| `org.owntracks.android.data.repos.MemoryContactsRepoTest` (27 seconds) | :tada: 5 tests, 5 passed, 0 skipped |\n| `org.owntracks.android.support.ParserTest` (25 seconds) | :tada: 11 tests, 11 passed, 0 skipped |\n| `org.owntracks.android.services.MessageProcessorEndpointHttpTest` (2 seconds) | :rotating_light: 7 tests, 1 failed |\n| **Total (a minute)** | **23 tests, 22 passed, 1 failed, 0 skipped** |'
       )
     })
   })

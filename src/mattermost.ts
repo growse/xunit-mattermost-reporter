@@ -4,6 +4,7 @@ import * as core from '@actions/core'
 import bent from 'bent'
 import {URL} from 'url'
 import path from 'path'
+import moment from 'moment'
 
 export interface MattermostAttachment {
   fallback: string
@@ -42,19 +43,32 @@ interface JunitSummary {
 }
 
 function generateTableMarkdownFromReport(report: JunitResults): string {
+  moment.relativeTimeThreshold('ss', 1)
   const summary = summarizeReport(report)
   return ['| Test suite | Results |', '|:---|:---|']
     .concat(
       report.testsuites.map(suite => {
         if (suite.errors === 0) {
-          return `| ${suite.name} (${suite.durationSec}s) | :tada: ${suite.tests} tests, ${suite.succeeded} passed, ${suite.skipped} skipped |`
+          return `| \`${suite.name}\` (${moment
+            .duration(suite.durationSec, 's')
+            .humanize()}) | :tada: ${suite.tests} tests, ${
+            suite.succeeded
+          } passed, ${suite.skipped} skipped |`
         } else {
-          return `| ${suite.name} (${suite.durationSec}s) | :rotating_light: ${suite.tests} tests, ${suite.errors} failed |`
+          return `| \`${suite.name}\` (${moment
+            .duration(suite.durationSec, 's')
+            .humanize()}) | :rotating_light: ${suite.tests} tests, ${
+            suite.errors
+          } failed |`
         }
       })
     )
     .concat(
-      `| **Total (${summary.duration}s)** | **${summary.tests} tests, ${summary.succeeded} passed, ${summary.errors} failed, ${summary.skipped} skipped** |`
+      `| **Total (${moment.duration(summary.duration, 's').humanize()})** | **${
+        summary.tests
+      } tests, ${summary.succeeded} passed, ${summary.errors} failed, ${
+        summary.skipped
+      } skipped** |`
     )
     .join('\n')
 }
@@ -119,8 +133,9 @@ export function renderReportToMattermostAttachment(
   const resultsTable = generateTableMarkdownFromReport(report)
   const notificationText = `![${context.actor} avatar](${actorAvatarUrl}) [${
     context.actor
-  }](${actorProfileUrl}) ran some tests ran on [${thingTitle}](${context.payload
-    .pull_request?.html_url ?? branchUrl}) at [${context.repo.owner}/${
+  }](${actorProfileUrl}) ran some tests ran on [${thingTitle}](${
+    context.payload.pull_request?.html_url ?? branchUrl
+  }) at [${context.repo.owner}/${
     context.repo.repo
   }](${repoUrl}) as part of the [${
     context.workflow
