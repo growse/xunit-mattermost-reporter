@@ -123,7 +123,7 @@ export function renderReportToMattermostAttachment(
   )
   const thingTitle = context.payload.pull_request
     ? `#${context.payload.pull_request.number} ${context.payload.pull_request.title}`
-    : context.ref
+    : getBranchNameFromRef(context.ref)
 
   const colour = allSucceeded ? '#00aa00' : '#aa0000'
   const notificationTitle = allSucceeded
@@ -150,10 +150,13 @@ export function renderReportToMattermostAttachment(
   }
 }
 
+function getBranchNameFromRef(ref: string): string {
+  return ref.startsWith('refs/heads/') ? ref.substr(11) : ref
+}
+
 function getBranchUrl(repoUrl: URL, ref: string): string {
-  const refName = ref.startsWith('refs/heads/') ? ref.substr(10) : ref
   return new URL(
-    path.join(repoUrl.pathname, 'tree', refName),
+    path.join(repoUrl.pathname, 'tree', getBranchNameFromRef(ref)),
     repoUrl
   ).toString()
 }
