@@ -1,6 +1,7 @@
 name: 'xunit-mattermost-reporter'
 description: 'A Github action to report the results of XUnit tests to Mattermost via a webhook'
 author: 'Andrew Rowson'
+color: blue
 inputs:
   mattermostWebhookUrl:
     description: 'URL of the Mattermost webhook to send the notification to'
