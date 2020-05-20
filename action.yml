@@ -1,0 +1,16 @@
+name: 'xunit-mattermost-reporter'
+description: 'A Github action to report the results of XUnit tests to Mattermost via a webhook'
+author: 'Andrew Rowson'
+branding:
+  icon: activity
+  color: blue
+inputs:
+  mattermostWebhookUrl:
+    description: 'URL of the Mattermost webhook to send the notification to'
+    required: true
+  xUnitTestPath:
+    description: 'Relative path to the directory containing the xUnit result files (or single XML file)'
+    required: true
+runs:
+  using: 'node12'
+  main: 'dist/index.js'
