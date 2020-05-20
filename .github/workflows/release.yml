@@ -11,3 +11,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: technote-space/release-github-actions@v6
+        with:
+          CLEAN_TARGETS: .[!.]*,__tests__,docs,lib,node_modules,src,*.js,*.ts,*.json,*.lock,*.yml,*.yaml
