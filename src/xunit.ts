@@ -4,6 +4,11 @@ import * as core from '@actions/core'
 
 import Parser from 'junitxml-to-javascript'
 
+export interface JunitSuiteProperty {
+  name: String
+  value: String
+}
+
 export interface JunitSuite {
   name: String
   tests: number
@@ -11,6 +16,7 @@ export interface JunitSuite {
   skipped: number
   errors: number
   durationSec: number
+  properties: JunitSuiteProperty[]
 }
 
 export interface JunitResults {

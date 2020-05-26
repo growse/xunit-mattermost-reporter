@@ -1,5 +1,5 @@
 import {context} from '@actions/github'
-import {JunitResults} from './xunit'
+import {JunitResults, JunitSuiteProperty} from './xunit'
 import * as core from '@actions/core'
 import bent from 'bent'
 import {URL} from 'url'
@@ -42,20 +42,34 @@ interface JunitSummary {
   duration: number
 }
 
+function junitSuitePropertiesToString(
+  properties: JunitSuiteProperty[]
+): string {
+  if (properties.length === 0) {
+    return ''
+  }
+  const props = properties
+    .filter(property => property.name !== '' && property.value !== '')
+    .map(property => `"${property.name}": "${property.value}"`)
+    .join(',')
+  return `{${props}} `
+}
+
 function generateTableMarkdownFromReport(report: JunitResults): string {
   moment.relativeTimeThreshold('ss', 1)
   const summary = summarizeReport(report)
   return ['| Test suite | Results |', '|:---|:---|']
     .concat(
       report.testsuites.map(suite => {
+        const properties = junitSuitePropertiesToString(suite.properties)
         if (suite.errors === 0) {
-          return `| \`${suite.name}\` (${moment
+          return `| \`${suite.name}\` ${properties}(${moment
             .duration(suite.durationSec, 's')
             .humanize()}) | :tada: ${suite.tests} tests, ${
             suite.succeeded
           } passed, ${suite.skipped} skipped |`
         } else {
-          return `| \`${suite.name}\` (${moment
+          return `| \`${suite.name}\` ${properties}(${moment
             .duration(suite.durationSec, 's')
             .humanize()}) | :rotating_light: ${suite.tests} tests, ${
             suite.errors

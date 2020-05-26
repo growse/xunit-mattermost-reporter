@@ -105,6 +105,8 @@ lib/**/*#### joe made this: http://goel.io/joe
 .idea/**/usage.statistics.xml
 .idea/**/dictionaries
 .idea/**/shelf
+.idea/**/vcs.xml
+
 
 # Sensitive or high-churn files
 .idea/**/dataSources/
