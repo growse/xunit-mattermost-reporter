@@ -28,7 +28,7 @@
     "@actions/core": "^1.2.4",
     "@actions/github": "^3.0.0",
     "@types/bent": "^7.0.2",
-    "bent": "^7.3.4",
+    "bent": "^7.3.5",
     "junitxml-to-javascript": "^1.1.4",
     "moment": "^2.26.0"
   },
