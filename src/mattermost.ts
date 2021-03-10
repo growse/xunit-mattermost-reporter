@@ -147,7 +147,7 @@ export function renderReportToMattermostAttachment(
   const resultsTable = generateTableMarkdownFromReport(report)
   const notificationText = `![${context.actor} avatar](${actorAvatarUrl}) [${
     context.actor
-  }](${actorProfileUrl}) ran some tests ran on [${thingTitle}](${
+  }](${actorProfileUrl}) ran ${summary.tests} tests ran on [${thingTitle}](${
     context.payload.pull_request?.html_url ?? branchUrl
   }) at [${context.repo.owner}/${
     context.repo.repo
