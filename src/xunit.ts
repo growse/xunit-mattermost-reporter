@@ -5,12 +5,12 @@ import * as core from '@actions/core'
 import Parser from 'junitxml-to-javascript'
 
 export interface JunitSuiteProperty {
-  name: String
-  value: String
+  name: string
+  value: string
 }
 
 export interface JunitSuite {
-  name: String
+  name: string
   tests: number
   succeeded: number
   skipped: number
