@@ -13,6 +13,7 @@ jobs:
       - uses: technote-space/release-github-actions@v6
         with:
           CLEAN_TARGETS: .[!.]*,__tests__,docs,lib,node_modules,src,*.js,*.ts,*.json,*.lock,*.yml,*.yaml
+          BUILD_COMMAND_TARGET: "build:all"
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
